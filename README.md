@@ -6,6 +6,18 @@ Vehica is an enterprise-grade car rental platform built with **Clean Architectur
 
 ---
 
+## 👥 Project Team Members
+
+| No. | Full Name | Student ID | Role |
+| :---: | :--- | :---: | :--- |
+| 1 | **Nguyễn Văn Đức Long** | `CS190175` | **Team Leader** |
+| 2 | **Nguyễn Hoàng Thái Vinh** | `CE190384` | **Developer** |
+| 3 | **Nguyễn Việt Tân** | `CE191195` | **Developer** |
+| 4 | **Lê Khánh Đăng** | `CE180954` | **Developer** |
+| 5 | **Nguyễn Quốc Kiệt** | `CE191198` | **Developer** |
+
+---
+
 ## 🏛️ System Architecture Diagram
 
 The system is designed following **Clean Architecture & Layered Enterprise Architecture**, strictly decoupling the Presentation Layer (Mobile Client), Business Logic & API Layer (Backend Platform), and Cloud Infrastructure (Database & CDN Storage):
