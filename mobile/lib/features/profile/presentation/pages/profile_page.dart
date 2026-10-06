@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
 import 'package:vehica_mobile/core/widgets/vehica_back_button.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_info_card.dart';
+import 'package:vehica_mobile/features/profile/presentation/widgets/profile_logout_tile.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -49,6 +51,17 @@ class ProfilePage extends ConsumerWidget {
             ProfileInfoCard(
               user: user,
               isDark: isDark,
+            ),
+            const SizedBox(height: 18),
+            ProfileLogoutTile(
+              isDark: isDark,
+              onTap: () => showProfileLogoutDialog(
+                context,
+                onConfirm: () async {
+                  await ref.read(authControllerProvider.notifier).logout();
+                  if (context.mounted) context.go('/login');
+                },
+              ),
             ),
           ],
         ),
