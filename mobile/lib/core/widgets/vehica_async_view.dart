@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vehica_mobile/core/widgets/vehica_empty_view.dart';
 import 'package:vehica_mobile/core/widgets/vehica_error_view.dart';
+import 'package:vehica_mobile/core/widgets/vehica_skeleton.dart';
 
 class VehicaAsyncView<T> extends StatelessWidget {
   final bool isLoading;
@@ -30,10 +31,16 @@ class VehicaAsyncView<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return loadingWidget ??
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32.0),
-              child: CircularProgressIndicator(),
+          ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: 4,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (_, __) => const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: VehicaSkeleton(
+                height: 80,
+                borderRadius: BorderRadius.all(Radius.circular(16)),
+              ),
             ),
           );
     }

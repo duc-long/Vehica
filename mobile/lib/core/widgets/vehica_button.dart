@@ -65,13 +65,17 @@ class VehicaButton extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              Text(
-                text,
-                style: TextStyle(
-                  color: _getTextColor(isDark, isEnabled),
-                  fontWeight: FontWeight.w700,
-                  fontSize: fontSize,
-                  letterSpacing: 0.2,
+              Flexible(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: _getTextColor(isDark, isEnabled),
+                    fontWeight: FontWeight.w700,
+                    fontSize: fontSize,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
               if (trailingIcon != null) ...[
@@ -215,4 +219,3 @@ class VehicaButton extends StatelessWidget {
     );
   }
 }
-
