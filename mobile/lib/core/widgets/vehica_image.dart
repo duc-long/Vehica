@@ -6,6 +6,7 @@
 // ==============================================================================
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
 
@@ -38,6 +39,19 @@ class VehicaImage extends StatelessWidget {
 
     if (!validUrl) {
       imageWidget = _buildFallback(isDark);
+    } else if (kIsWeb) {
+      imageWidget = Image.network(
+        imageUrl!.trim(),
+        width: width,
+        height: height,
+        fit: fit,
+        semanticLabel: semanticLabel,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildPlaceholder(isDark);
+        },
+        errorBuilder: (context, error, stackTrace) => _buildFallback(isDark),
+      );
     } else {
       imageWidget = CachedNetworkImage(
         imageUrl: imageUrl!.trim(),

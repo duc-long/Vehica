@@ -14,6 +14,9 @@ class VehicaTextField extends StatefulWidget {
   final int maxLines;
   final bool readOnly;
   final VoidCallback? onTap;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final AutovalidateMode? autovalidateMode;
 
   const VehicaTextField({
     super.key,
@@ -30,6 +33,9 @@ class VehicaTextField extends StatefulWidget {
     this.maxLines = 1,
     this.readOnly = false,
     this.onTap,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
   });
 
   @override
@@ -58,10 +64,13 @@ class _VehicaTextFieldState extends State<VehicaTextField> {
         ],
         TextFormField(
           controller: widget.controller,
-          initialValue: widget.initialValue,
+          initialValue: widget.controller != null ? null : widget.initialValue,
           validator: widget.validator,
+          autovalidateMode: widget.autovalidateMode,
           onChanged: widget.onChanged,
           keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onFieldSubmitted,
           obscureText: widget.isPassword ? _obscureText : false,
           maxLines: widget.isPassword ? 1 : widget.maxLines,
           readOnly: widget.readOnly,
