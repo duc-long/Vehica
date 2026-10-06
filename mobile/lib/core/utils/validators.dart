@@ -34,9 +34,10 @@ class VehicaValidators {
     if (value == null || value.trim().isEmpty) {
       return 'Vui lòng nhập số điện thoại';
     }
-    final cleanPhone = value.replaceAll(RegExp(r'\s+'), '');
-    if (cleanPhone.length < 9 || cleanPhone.length > 20) {
-      return 'Số điện thoại không hợp lệ';
+    final cleanPhone = value.replaceAll(RegExp(r'[\s\-\.\(\)]'), '');
+    final phoneRegex = RegExp(r'^(?:0|\+84)(?:3|5|7|8|9)\d{8}$');
+    if (!phoneRegex.hasMatch(cleanPhone)) {
+      return 'Số điện thoại không hợp lệ (10 chữ số, đầu 03, 05, 07, 08, 09)';
     }
     return null;
   }

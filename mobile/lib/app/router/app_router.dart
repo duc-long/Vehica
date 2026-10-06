@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/register_page.dart';
@@ -68,21 +69,44 @@ CustomTransitionPage<T> _fadePage<T>(Widget child, GoRouterState state) {
 
 // ── Router provider ────────────────────────────────────────────────────────────
 
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen<AuthState>(
+      authControllerProvider,
+      (previous, next) {
+        if (previous?.isAuthenticated != next.isAuthenticated) {
+          notifyListeners();
+        }
+      },
+    );
+  }
+
+  String? redirect(BuildContext context, GoRouterState state) {
+    final authState = _ref.read(authControllerProvider);
+    final isAuth = authState.isAuthenticated;
+    final isLoggingIn = state.matchedLocation == '/login' ||
+        state.matchedLocation == '/register' ||
+        state.matchedLocation == '/forgot-password';
+
+    if (!isAuth && !isLoggingIn) return '/login';
+    if (isAuth && isLoggingIn) return '/profile';
+    return null;
+  }
+}
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  return RouterNotifier(ref);
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/login',
-    redirect: (context, state) {
-      final isAuth = authState.isAuthenticated;
-      final isLoggingIn = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register' ||
-          state.matchedLocation == '/forgot-password';
-
-      if (!isAuth && !isLoggingIn) return '/login';
-      if (isAuth && isLoggingIn) return '/profile';
-      return null;
-    },
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
     routes: [
       // ── Auth ──────────────────────────────────────────────────────────────
       GoRoute(
@@ -91,15 +115,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/register',
-        pageBuilder: (context, state) => _slideRightPage(
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Tạo tài khoản'),
-            ),
-            body: const RegisterPage(),
-          ),
-          state,
-        ),
+        pageBuilder: (context, state) => _slideRightPage(const RegisterPage(), state),
       ),
       GoRoute(
         path: '/forgot-password',

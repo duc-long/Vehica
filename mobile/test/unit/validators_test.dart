@@ -20,6 +20,22 @@ void main() {
       expect(VehicaValidators.validatePassword('password123'), isNull);
     });
 
+    test('TC-03: Phone validation accepts valid Vietnamese numbers (BR-01)', () {
+      expect(VehicaValidators.validatePhone('0901234567'), isNull);
+      expect(VehicaValidators.validatePhone('0381234567'), isNull);
+      expect(VehicaValidators.validatePhone('0901 234 567'), isNull);
+      expect(VehicaValidators.validatePhone('+84901234567'), isNull);
+    });
+
+    test('TC-04: Phone validation rejects invalid formats (BR-01)', () {
+      expect(VehicaValidators.validatePhone(''), isNotNull);
+      expect(VehicaValidators.validatePhone('123456'), isNotNull);
+      expect(VehicaValidators.validatePhone('0123456789'), isNotNull); // 01 is not a valid mobile prefix
+      expect(VehicaValidators.validatePhone('1234567890'), isNotNull); // Not starting with 0 or +84
+      expect(VehicaValidators.validatePhone('090123456789'), isNotNull); // Too long
+      expect(VehicaValidators.validatePhone('abcdefghij'), isNotNull); // Letters
+    });
+
     test('TC-05: Date range validation requires startDate < endDate (BR-08)', () {
       final now = DateTime.now();
       final tomorrow = now.add(const Duration(days: 1));

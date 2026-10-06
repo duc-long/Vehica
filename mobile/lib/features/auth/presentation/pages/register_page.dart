@@ -55,7 +55,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
+        const SnackBar(
+          content: Text('Mật khẩu xác nhận không khớp'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
@@ -67,11 +70,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           phone: _phoneController.text.trim(),
         );
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng ký thành công! Vui lòng đăng nhập.')),
+        const SnackBar(
+          content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
+          backgroundColor: AppColors.primary,
+        ),
       );
       context.pop();
+    } else {
+      final errorMsg = ref.read(authControllerProvider).errorMessage ??
+          'Đăng ký thất bại. Vui lòng thử lại.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMsg),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -143,6 +160,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 padding: const EdgeInsets.all(20),
                 child: Form(
                   key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

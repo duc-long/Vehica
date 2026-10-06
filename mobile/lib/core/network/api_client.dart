@@ -12,13 +12,15 @@ class ApiClient {
     void Function()? onUnauthorized,
     Dio? customDio,
   }) {
-    dio = customDio ??
+    dio =
+        customDio ??
         Dio(
           BaseOptions(
             baseUrl: AppConfig.baseUrl,
             connectTimeout: AppConfig.connectTimeout,
             receiveTimeout: AppConfig.receiveTimeout,
-            validateStatus: (status) => status != null && status >= 200 && status < 300,
+            validateStatus: (status) =>
+                status != null && status >= 200 && status < 300,
           ),
         );
 
@@ -36,7 +38,11 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await dio.get(path, queryParameters: queryParameters, options: options);
+      final response = await dio.get(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -50,7 +56,12 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await dio.post(path, data: data, queryParameters: queryParameters, options: options);
+      final response = await dio.post(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -64,7 +75,12 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await dio.put(path, data: data, queryParameters: queryParameters, options: options);
+      final response = await dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -78,7 +94,12 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await dio.patch(path, data: data, queryParameters: queryParameters, options: options);
+      final response = await dio.patch(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -92,7 +113,12 @@ class ApiClient {
     Options? options,
   }) async {
     try {
-      final response = await dio.delete(path, data: data, queryParameters: queryParameters, options: options);
+      final response = await dio.delete(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
       return response.data;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -114,7 +140,14 @@ class ApiClient {
 
       if (response.data is Map<String, dynamic>) {
         final map = response.data as Map<String, dynamic>;
-        if (map.containsKey('message') && map['message'] != null) {
+        if (map['data'] is Map<String, dynamic>) {
+          final fieldErrors = map['data'] as Map<String, dynamic>;
+          if (fieldErrors.isNotEmpty) {
+            message = fieldErrors.values.first.toString();
+          } else if (map.containsKey('message') && map['message'] != null) {
+            message = map['message'].toString();
+          }
+        } else if (map.containsKey('message') && map['message'] != null) {
           message = map['message'].toString();
         }
       }
