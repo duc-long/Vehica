@@ -43,7 +43,10 @@ CustomTransitionPage<T> _slideRightPage<T>(Widget child, GoRouterState state) {
         begin: const Offset(1.0, 0.0),
         end: Offset.zero,
       ).chain(CurveTween(curve: Curves.easeOutCubic));
-      final fade = CurvedAnimation(parent: animation, curve: const Interval(0, 0.6));
+      final fade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0, 0.6),
+      );
       return FadeTransition(
         opacity: fade,
         child: SlideTransition(position: animation.drive(tween), child: child),
@@ -73,20 +76,18 @@ class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
-    _ref.listen<AuthState>(
-      authControllerProvider,
-      (previous, next) {
-        if (previous?.isAuthenticated != next.isAuthenticated) {
-          notifyListeners();
-        }
-      },
-    );
+    _ref.listen<AuthState>(authControllerProvider, (previous, next) {
+      if (previous?.isAuthenticated != next.isAuthenticated) {
+        notifyListeners();
+      }
+    });
   }
 
   String? redirect(BuildContext context, GoRouterState state) {
     final authState = _ref.read(authControllerProvider);
     final isAuth = authState.isAuthenticated;
-    final isLoggingIn = state.matchedLocation == '/login' ||
+    final isLoggingIn =
+        state.matchedLocation == '/login' ||
         state.matchedLocation == '/register' ||
         state.matchedLocation == '/forgot-password';
 
@@ -115,17 +116,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/register',
-        pageBuilder: (context, state) => _slideRightPage(const RegisterPage(), state),
+        pageBuilder: (context, state) =>
+            _slideRightPage(const RegisterPage(), state),
       ),
       GoRoute(
         path: '/forgot-password',
-        pageBuilder: (context, state) => _slideRightPage(const ForgotPasswordPage(), state),
+        pageBuilder: (context, state) =>
+            _slideRightPage(const ForgotPasswordPage(), state),
       ),
 
       // ── Profile ───────────────────────────────────────────────────────────
       GoRoute(
         path: '/profile',
-        pageBuilder: (context, state) => _slideUpPage(const ProfilePage(), state),
+        pageBuilder: (context, state) =>
+            _slideUpPage(const ProfilePage(), state),
       ),
     ],
   );

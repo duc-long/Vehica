@@ -43,18 +43,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await ref.read(authControllerProvider.notifier).login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
 
     if (success && mounted) {
-      final authState = ref.read(authControllerProvider);
-      if (authState.isAdmin) {
-        context.go('/admin/dashboard');
-      } else {
-        context.go('/home');
-      }
+      context.go('/profile');
     }
   }
 
@@ -91,10 +85,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          'Đăng nhập',
-                          style: theme.textTheme.headlineSmall,
-                        ),
+                        Text('Đăng nhập', style: theme.textTheme.headlineSmall),
                         const SizedBox(height: 4),
                         Text(
                           'Tiếp tục trải nghiệm dịch vụ thuê xe',
@@ -134,7 +125,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: TextButton(
                             onPressed: () => context.push('/forgot-password'),
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
                               minimumSize: const Size(50, 30),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -172,8 +166,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         _passwordController.text = 'admin123456';
                       },
                     ),
-                    Container(width: 1, height: 14, color: AppColors.borderLight,
-                        margin: const EdgeInsets.symmetric(horizontal: 10)),
+                    Container(
+                      width: 1,
+                      height: 14,
+                      color: AppColors.borderLight,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
                     _QuickFill(
                       label: 'Khách',
                       onTap: () {
@@ -189,8 +187,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Chưa có tài khoản? ',
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
+                    Text(
+                      'Chưa có tài khoản? ',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                    ),
                     GestureDetector(
                       onTap: () => context.push('/register'),
                       child: Text(
@@ -239,7 +242,11 @@ class _BrandMark extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 34),
+          child: const Icon(
+            Icons.directions_car_rounded,
+            color: Colors.white,
+            size: 34,
+          ),
         ),
         const SizedBox(height: 14),
         const Text(
@@ -281,10 +288,17 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: AppColors.error,
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(message, style: const TextStyle(color: AppColors.error, fontSize: 13)),
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.error, fontSize: 13),
+            ),
           ),
         ],
       ),
