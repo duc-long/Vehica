@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
+import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
 
 // ── Transition builders ────────────────────────────────────────────────────────
 
@@ -90,6 +91,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) => _fadePage(const LoginPage(), state),
+      ),
+      GoRoute(
+        path: '/profile',
+        pageBuilder: (context, state) => _slideRightPage(const ProfilePage(), state),
       ),
     ],
   );
