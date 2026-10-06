@@ -99,3 +99,5 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+// Fix [#1]: Route to profile screen upon successful login in Phase 1
