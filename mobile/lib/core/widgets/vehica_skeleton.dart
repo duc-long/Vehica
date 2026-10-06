@@ -112,25 +112,28 @@ class VehicleCardSkeleton extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    VehicaSkeleton(width: 140, height: 16),
-                    VehicaSkeleton(width: 80, height: 16),
+                    Expanded(
+                      child: VehicaSkeleton(height: 16),
+                    ),
+                    SizedBox(width: 14),
+                    VehicaSkeleton(width: 60, height: 16),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const VehicaSkeleton(width: 180, height: 12),
+                const VehicaSkeleton(width: 130, height: 12),
                 const SizedBox(height: 10),
                 Divider(
                   height: 1,
                   color: isDark ? AppColors.borderDark : AppColors.divider,
                 ),
                 const SizedBox(height: 10),
-                Row(
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
                   children: const [
-                    VehicaSkeleton(width: 60, height: 11),
-                    SizedBox(width: 10),
-                    VehicaSkeleton(width: 50, height: 11),
-                    SizedBox(width: 10),
-                    VehicaSkeleton(width: 60, height: 11),
+                    VehicaSkeleton(width: 48, height: 11),
+                    VehicaSkeleton(width: 42, height: 11),
+                    VehicaSkeleton(width: 48, height: 11),
                   ],
                 ),
               ],
@@ -144,13 +147,15 @@ class VehicleCardSkeleton extends StatelessWidget {
 
 /// Skeleton cho booking card
 class BookingCardSkeleton extends StatelessWidget {
-  const BookingCardSkeleton({super.key});
+  final EdgeInsetsGeometry? margin;
+
+  const BookingCardSkeleton({super.key, this.margin});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: margin ?? const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
@@ -159,13 +164,15 @@ class BookingCardSkeleton extends StatelessWidget {
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                VehicaSkeleton(width: 120, height: 14),
+                Expanded(child: VehicaSkeleton(height: 14)),
+                SizedBox(width: 14),
                 VehicaSkeleton(
                   width: 70,
                   height: 22,
@@ -190,13 +197,16 @@ class BookingCardSkeleton extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
                 const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    VehicaSkeleton(width: 140, height: 14),
-                    SizedBox(height: 6),
-                    VehicaSkeleton(width: 100, height: 11),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      VehicaSkeleton(height: 14),
+                      SizedBox(height: 6),
+                      VehicaSkeleton(width: 100, height: 11),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -213,7 +223,8 @@ class BookingCardSkeleton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                VehicaSkeleton(width: 130, height: 12),
+                Expanded(child: VehicaSkeleton(height: 12)),
+                SizedBox(width: 12),
                 VehicaSkeleton(width: 80, height: 16),
               ],
             ),
