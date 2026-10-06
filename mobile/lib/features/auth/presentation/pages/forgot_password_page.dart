@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -41,9 +43,29 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _confirmPasswordController = TextEditingController();
 
   String? _serverOtpHint;
+  Timer? _countdownTimer;
+  int _resendCooldown = 0;
+
+  void _startCooldown() {
+    _countdownTimer?.cancel();
+    setState(() => _resendCooldown = 60);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendCooldown <= 1) {
+        timer.cancel();
+        setState(() => _resendCooldown = 0);
+      } else {
+        setState(() => _resendCooldown--);
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _emailController.dispose();
     _otpController.dispose();
     _newPasswordController.dispose();
@@ -51,22 +73,45 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     super.dispose();
   }
 
-  Future<void> _handleRequestOtp() async {
-    if (!_step1FormKey.currentState!.validate()) return;
+  Future<void> _handleRequestOtp({bool isResend = false}) async {
+    // Only validate step 1 form when submitting from step 1
+    if (!isResend && _currentStep == 1) {
+      if (_step1FormKey.currentState != null &&
+          !_step1FormKey.currentState!.validate()) {
+        return;
+      }
+    }
 
     final email = _emailController.text.trim();
-    final otp = await ref.read(authControllerProvider.notifier).forgotPassword(email);
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng nhập địa chỉ email'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final otp = await ref
+        .read(authControllerProvider.notifier)
+        .forgotPassword(email);
 
     if (otp != null && mounted) {
+      _startCooldown();
       setState(() {
         _serverOtpHint = otp;
-        _otpController.text = otp; // Automatically fill OTP for smooth experience in testing/demo
+        _otpController.text = otp;
         _currentStep = 2;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Mã OTP đã được gửi đến $email (Mã: $otp)'),
+          content: Text(
+            isResend
+                ? 'Mã OTP mới đã được gửi đến $email (Mã: $otp)'
+                : 'Mã OTP đã được gửi đến $email (Mã: $otp)',
+          ),
           backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,
         ),
@@ -75,7 +120,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Future<void> _handleResetPassword() async {
-    if (!_step2FormKey.currentState!.validate()) return;
+    if (_step2FormKey.currentState != null &&
+        !_step2FormKey.currentState!.validate()) {
+      return;
+    }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +136,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       return;
     }
 
-    final success = await ref.read(authControllerProvider.notifier).resetPassword(
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .resetPassword(
           email: _emailController.text.trim(),
           otp: _otpController.text.trim(),
           newPassword: _newPasswordController.text,
@@ -97,7 +147,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Đặt lại mật khẩu thành công! Hãy đăng nhập bằng mật khẩu mới.'),
+          content: Text(
+            'Đặt lại mật khẩu thành công! Hãy đăng nhập bằng mật khẩu mới.',
+          ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -363,9 +415,19 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 label: const Text('Đổi email', style: TextStyle(fontSize: 13)),
               ),
               TextButton.icon(
-                onPressed: authState.isLoading ? null : _handleRequestOtp,
+                onPressed: (authState.isLoading || _resendCooldown > 0)
+                    ? null
+                    : () => _handleRequestOtp(isResend: true),
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Gửi lại mã OTP', style: TextStyle(fontSize: 13)),
+                label: Text(
+                  _resendCooldown > 0
+                      ? 'Gửi lại mã OTP (${_resendCooldown}s)'
+                      : 'Gửi lại mã OTP',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _resendCooldown > 0 ? AppColors.textSecondary : null,
+                  ),
+                ),
               ),
             ],
           ),
