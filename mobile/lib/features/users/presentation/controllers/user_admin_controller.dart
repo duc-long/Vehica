@@ -17,6 +17,17 @@ class UserAdminController {
     required this.ref,
   });
 
+  Future<bool> toggleUserStatus(UserEntity user) async {
+    final nextStatus = user.status == 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
+    try {
+      await repository.updateUserStatus(user.id, nextStatus);
+      _invalidateAll();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> createUser(Map<String, dynamic> data) async {
     try {
       await repository.createUser(data);

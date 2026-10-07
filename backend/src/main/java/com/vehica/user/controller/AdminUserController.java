@@ -62,4 +62,13 @@ public class AdminUserController {
         UserDto updated = userService.updateUser(id, request);
         return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công", updated));
     }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Update user status (ACTIVE / BLOCKED)")
+    public ResponseEntity<ApiResponse<UserDto>> updateUserStatus(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdminUserDtos.UpdateUserStatusRequest request) {
+        UserDto updated = userService.updateUserStatus(id, request.getStatus());
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái thành công", updated));
+    }
 }

@@ -69,6 +69,15 @@ public class UserService {
         return mapToDto(userRepository.save(user));
     }
 
+    @Transactional
+    public UserDto updateUserStatus(UUID userId, UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        user.setStatus(status);
+        return mapToDto(userRepository.save(user));
+    }
+
     public UserDto mapToDto(User user) {
         return UserDto.builder()
                 .id(user.getId())

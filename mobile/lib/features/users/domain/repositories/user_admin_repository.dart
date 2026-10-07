@@ -9,4 +9,5 @@ abstract class UserAdminRepository {
   });
   Future<UserEntity> createUser(Map<String, dynamic> data);
   Future<UserEntity> updateUser(String id, Map<String, dynamic> data);
+  Future<UserEntity> updateUserStatus(String id, String status);
 }
