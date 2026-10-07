@@ -7,4 +7,5 @@ abstract class UserAdminRepository {
     int page = 0,
     int size = 10,
   });
+  Future<UserEntity> createUser(Map<String, dynamic> data);
 }

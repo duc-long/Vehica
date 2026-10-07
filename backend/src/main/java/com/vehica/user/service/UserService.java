@@ -1,14 +1,17 @@
 package com.vehica.user.service;
 
 import com.vehica.common.enums.UserStatus;
+import com.vehica.common.exception.ConflictException;
 import com.vehica.common.exception.ResourceNotFoundException;
 import com.vehica.common.response.PageResponse;
+import com.vehica.user.dto.AdminUserDtos;
 import com.vehica.user.dto.UserDto;
 import com.vehica.user.entity.User;
 import com.vehica.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public UserDto getProfile(UUID userId) {
@@ -31,6 +35,24 @@ public class UserService {
     public PageResponse<UserDto> searchUsers(String keyword, UserStatus status, Pageable pageable) {
         Page<User> page = userRepository.searchUsers(keyword, status, pageable);
         return PageResponse.from(page.map(this::mapToDto));
+    }
+
+    @Transactional
+    public UserDto createUser(AdminUserDtos.CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email đã tồn tại. Hãy dùng email khác.");
+        }
+
+        User user = User.builder()
+                .email(request.getEmail().toLowerCase().trim())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName().trim())
+                .phone(request.getPhone().trim())
+                .role(request.getRole())
+                .status(request.getStatus())
+                .build();
+
+        return mapToDto(userRepository.save(user));
     }
 
     public UserDto mapToDto(User user) {

@@ -16,4 +16,7 @@ class UserAdminRepositoryImpl implements UserAdminRepository {
   }) {
     return remoteDataSource.searchUsers(search: search, status: status, page: page, size: size);
   }
+
+  @override
+  Future<UserEntity> createUser(Map<String, dynamic> data) => remoteDataSource.createUser(data);
 }

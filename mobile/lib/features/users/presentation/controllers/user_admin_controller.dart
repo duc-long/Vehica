@@ -17,6 +17,16 @@ class UserAdminController {
     required this.ref,
   });
 
+  Future<bool> createUser(Map<String, dynamic> data) async {
+    try {
+      await repository.createUser(data);
+      _invalidateAll();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _invalidateAll() {
     ref.invalidate(adminUsersListProvider);
   }
