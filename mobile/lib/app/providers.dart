@@ -4,6 +4,9 @@ import 'package:vehica_mobile/core/storage/secure_storage_service.dart';
 import 'package:vehica_mobile/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:vehica_mobile/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vehica_mobile/features/auth/domain/repositories/auth_repository.dart';
+import 'package:vehica_mobile/features/users/data/datasources/user_admin_remote_data_source.dart';
+import 'package:vehica_mobile/features/users/data/repositories/user_admin_repository_impl.dart';
+import 'package:vehica_mobile/features/users/domain/repositories/user_admin_repository.dart';
 
 // Storage Provider
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
@@ -26,4 +29,15 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remote = ref.watch(authRemoteDataSourceProvider);
   final storage = ref.watch(secureStorageProvider);
   return AuthRepositoryImpl(remoteDataSource: remote, storageService: storage);
+});
+
+// User Admin Providers
+final userAdminRemoteDataSourceProvider = Provider<UserAdminRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return UserAdminRemoteDataSource(apiClient: apiClient);
+});
+
+final userAdminRepositoryProvider = Provider<UserAdminRepository>((ref) {
+  final remote = ref.watch(userAdminRemoteDataSourceProvider);
+  return UserAdminRepositoryImpl(remoteDataSource: remote);
 });
