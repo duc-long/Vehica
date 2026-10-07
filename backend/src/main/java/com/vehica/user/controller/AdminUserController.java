@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
@@ -50,5 +52,14 @@ public class AdminUserController {
         UserDto created = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Tạo người dùng thành công", created));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user details as Admin")
+    public ResponseEntity<ApiResponse<UserDto>> updateUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdminUserDtos.UpdateUserRequest request) {
+        UserDto updated = userService.updateUser(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công", updated));
     }
 }

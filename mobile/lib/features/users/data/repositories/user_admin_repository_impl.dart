@@ -19,4 +19,8 @@ class UserAdminRepositoryImpl implements UserAdminRepository {
 
   @override
   Future<UserEntity> createUser(Map<String, dynamic> data) => remoteDataSource.createUser(data);
+
+  @override
+  Future<UserEntity> updateUser(String id, Map<String, dynamic> data) =>
+      remoteDataSource.updateUser(id, data);
 }

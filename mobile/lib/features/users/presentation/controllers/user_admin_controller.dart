@@ -27,6 +27,16 @@ class UserAdminController {
     }
   }
 
+  Future<bool> updateUser(String userId, Map<String, dynamic> data) async {
+    try {
+      await repository.updateUser(userId, data);
+      _invalidateAll();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _invalidateAll() {
     ref.invalidate(adminUsersListProvider);
   }
