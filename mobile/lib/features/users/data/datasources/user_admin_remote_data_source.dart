@@ -29,4 +29,9 @@ class UserAdminRemoteDataSource {
     final response = await apiClient.post(ApiEndpoints.adminUsers, data: data);
     return UserModel.fromJson(response['data'] as Map<String, dynamic>);
   }
+
+  Future<UserModel> updateUser(String id, Map<String, dynamic> data) async {
+    final response = await apiClient.put(ApiEndpoints.adminUserDetail(id), data: data);
+    return UserModel.fromJson(response['data'] as Map<String, dynamic>);
+  }
 }

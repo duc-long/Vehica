@@ -55,6 +55,20 @@ public class UserService {
         return mapToDto(userRepository.save(user));
     }
 
+    @Transactional
+    public UserDto updateUser(UUID userId, AdminUserDtos.UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
+
+        user.setFullName(request.getFullName().trim());
+        user.setPhone(request.getPhone().trim());
+        user.setAvatarUrl(request.getAvatarUrl());
+        user.setRole(request.getRole());
+        user.setStatus(request.getStatus());
+
+        return mapToDto(userRepository.save(user));
+    }
+
     public UserDto mapToDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
