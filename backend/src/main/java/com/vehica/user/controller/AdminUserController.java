@@ -3,14 +3,17 @@ package com.vehica.user.controller;
 import com.vehica.common.enums.UserStatus;
 import com.vehica.common.response.ApiResponse;
 import com.vehica.common.response.PageResponse;
+import com.vehica.user.dto.AdminUserDtos;
 import com.vehica.user.dto.UserDto;
 import com.vehica.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +42,13 @@ public class AdminUserController {
 
         PageResponse<UserDto> users = userService.searchUsers(search, status, pageable);
         return ResponseEntity.ok(ApiResponse.success(users));
+    }
+
+    @PostMapping
+    @Operation(summary = "Create user as Admin")
+    public ResponseEntity<ApiResponse<UserDto>> createUser(@Valid @RequestBody AdminUserDtos.CreateUserRequest request) {
+        UserDto created = userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Tạo người dùng thành công", created));
     }
 }
