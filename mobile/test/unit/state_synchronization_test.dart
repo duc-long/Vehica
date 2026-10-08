@@ -220,6 +220,7 @@ void main() {
       container.dispose();
     });
 
+    /// Tests reactive state reload on catalog filter and search changes (UC-04, BR-04).
     test('VehicleListController reloads reactively on filter changes', () async {
       // Initialize controller
       final controller = container.read(vehicleListControllerProvider.notifier);
