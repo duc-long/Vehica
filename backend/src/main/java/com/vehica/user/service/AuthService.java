@@ -84,12 +84,21 @@ public class AuthService {
      * @return authentication response containing the bearer JWT token and user info
      */
     public AuthResponse login(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail().toLowerCase().trim(),
-                        request.getPassword()
-                )
-        );
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail().toLowerCase().trim(),
+                            request.getPassword()
+                    )
+            );
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            throw new BadRequestException("Email hoặc mật khẩu không đúng.");
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            throw new ForbiddenException("Tài khoản đã bị vô hiệu hóa.");
+        } catch (org.springframework.security.authentication.LockedException e) {
+            throw new ForbiddenException("Tài khoản đang bị khóa. Hãy liên hệ quản trị viên.");
+        }
 
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
