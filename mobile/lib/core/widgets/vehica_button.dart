@@ -15,6 +15,7 @@ class VehicaButton extends StatelessWidget {
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
   final double fontSize;
+  final Gradient? customGradient;
 
   const VehicaButton({
     super.key,
@@ -29,6 +30,7 @@ class VehicaButton extends StatelessWidget {
     this.borderRadius = 16,
     this.padding,
     this.fontSize = 15,
+    this.customGradient,
   });
 
   @override
@@ -122,16 +124,22 @@ class VehicaButton extends StatelessWidget {
     switch (type) {
       case VehicaButtonType.primary:
         decoration = BoxDecoration(
-          color: isEnabled
-              ? AppColors.primary
-              : (isDark ? AppColors.surfaceVariantDark : const Color(0xFFCBD5E1)),
+          gradient: isEnabled
+              ? (customGradient ??
+                  const LinearGradient(
+                    colors: [AppColors.primary, Color(0xFF14B8A6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ))
+              : null,
+          color: isEnabled ? null : (isDark ? AppColors.surfaceVariantDark : const Color(0xFFCBD5E1)),
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: isEnabled
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: AppColors.primary.withValues(alpha: isDark ? 0.38 : 0.28),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
                   ),
                 ]
               : null,
@@ -166,16 +174,21 @@ class VehicaButton extends StatelessWidget {
 
       case VehicaButtonType.danger:
         decoration = BoxDecoration(
-          color: isEnabled
-              ? AppColors.error
-              : (isDark ? AppColors.surfaceVariantDark : const Color(0xFFCBD5E1)),
+          gradient: isEnabled
+              ? const LinearGradient(
+                  colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isEnabled ? null : (isDark ? AppColors.surfaceVariantDark : const Color(0xFFCBD5E1)),
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: isEnabled
               ? [
                   BoxShadow(
-                    color: AppColors.error.withValues(alpha: isDark ? 0.25 : 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.35 : 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ]
               : null,
@@ -206,4 +219,3 @@ class VehicaButton extends StatelessWidget {
     );
   }
 }
-

@@ -26,7 +26,7 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401 || err.response?.statusCode == 403) {
+    if (err.response?.statusCode == 401) {
       onUnauthorized?.call();
     }
     return handler.next(err);

@@ -99,6 +99,13 @@ class VehicaImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [AppColors.surfaceDark, AppColors.surfaceVariantDark]
+              : [AppColors.surfaceLight, AppColors.surfaceVariantLight],
+        ),
       ),
       child: Center(
         child: Icon(
