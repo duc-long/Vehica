@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vehica_mobile/core/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,15 +14,7 @@ class VehicaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Vehica Car Rental',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F1216),
-        primaryColor: const Color(0xFF107C74),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF107C74),
-          surface: Color(0xFF161B22),
-        ),
-      ),
+      theme: AppTheme.darkTheme,
       home: const Scaffold(
         body: Center(
           child: Text(
