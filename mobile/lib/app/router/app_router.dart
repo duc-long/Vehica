@@ -5,6 +5,7 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_contro
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
+import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 
 // ── Transition builders ────────────────────────────────────────────────────────
 
@@ -96,8 +97,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         pageBuilder: (context, state) => _slideRightPage(const ProfilePage(), state),
       ),
+      GoRoute(
+        path: '/admin/users',
+        pageBuilder: (context, state) => _slideRightPage(const AdminUserManagementPage(), state),
+      ),
     ],
   );
 });
-
-// Fix [#1]: Route to profile screen upon successful login in Phase 1
