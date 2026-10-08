@@ -20,6 +20,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * ==============================================================================================
+ * [BACKEND ADMIN USER MANAGEMENT CONTROLLER]
+ * - SERVICE LAYER    : UserService
+ * - LINKED SCREENS   : S09 (Admin User Management)
+ * - USE CASES        : UC-10 (Manage Users)
+ * - BUSINESS RULES   : BR-01 (Unique Email), BR-03 (Blocked Account Block), BR-20 (Account Status)
+ * ==============================================================================================
+ */
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
@@ -29,6 +38,9 @@ public class AdminUserController {
 
     private final UserService userService;
 
+    /**
+     * Retrieves paginated list of users with optional keyword and status filters (S09 Admin Users, UC-10).
+     */
     @GetMapping
     @Operation(summary = "Get paginated user list with optional search and status filter")
     public ResponseEntity<ApiResponse<PageResponse<UserDto>>> getUsers(
@@ -46,6 +58,9 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
+    /**
+     * Creates a new user account as administrator (S09 Admin Users, UC-10, BR-01).
+     */
     @PostMapping
     @Operation(summary = "Create user as Admin")
     public ResponseEntity<ApiResponse<UserDto>> createUser(@Valid @RequestBody AdminUserDtos.CreateUserRequest request) {
@@ -54,6 +69,9 @@ public class AdminUserController {
                 .body(ApiResponse.success("Tạo người dùng thành công", created));
     }
 
+    /**
+     * Updates user details as administrator (S09 Admin Users, UC-10).
+     */
     @PutMapping("/{id}")
     @Operation(summary = "Update user details as Admin")
     public ResponseEntity<ApiResponse<UserDto>> updateUser(
@@ -63,12 +81,25 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật người dùng thành công", updated));
     }
 
+    /**
+     * Updates user ACTIVE/BLOCKED status as administrator (S09 Admin Users, UC-10, BR-03).
+     */
     @PatchMapping("/{id}/status")
-    @Operation(summary = "Update user status (ACTIVE / BLOCKED)")
-    public ResponseEntity<ApiResponse<UserDto>> updateUserStatus(
+    @Operation(summary = "Update user ACTIVE/BLOCKED status as Admin")
+    public ResponseEntity<ApiResponse<UserDto>> updateStatus(
             @PathVariable UUID id,
-            @Valid @RequestBody AdminUserDtos.UpdateUserStatusRequest request) {
+            @Valid @RequestBody AdminUserDtos.UpdateStatusRequest request) {
         UserDto updated = userService.updateUserStatus(id, request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật trạng thái thành công", updated));
+    }
+
+    /**
+     * Deletes or soft-blocks user depending on booking history (S09 Admin Users, UC-10, BR-20).
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete user (Soft delete if bookings exist, hard delete if 0 bookings)")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success("Xóa/Khóa người dùng thành công", null));
     }
 }
