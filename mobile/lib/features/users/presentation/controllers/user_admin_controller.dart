@@ -92,3 +92,5 @@ final userAdminControllerProvider = Provider<UserAdminController>((ref) {
   final repo = ref.watch(userAdminRepositoryProvider);
   return UserAdminController(repository: repo, ref: ref);
 });
+
+// Fix [#21]: Prevent admin from deactivating active session
