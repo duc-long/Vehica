@@ -16,7 +16,6 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vehica_mobile/app/providers.dart';
-import 'package:vehica_mobile/core/error/exceptions.dart';
 import 'package:vehica_mobile/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 
@@ -25,8 +24,10 @@ class AuthController extends StateNotifier<AuthState> {
   final AuthRepository authRepository;
   final Ref ref;
 
-  AuthController({required this.authRepository, required this.ref})
-    : super(const AuthState()) {
+  AuthController({
+    required this.authRepository,
+    required this.ref,
+  }) : super(const AuthState()) {
     checkAuthStatus();
   }
 
@@ -55,7 +56,7 @@ class AuthController extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: _parseError(e),
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       );
       return false;
     }
@@ -81,7 +82,7 @@ class AuthController extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: _parseError(e),
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       );
       return false;
     }
@@ -103,7 +104,7 @@ class AuthController extends StateNotifier<AuthState> {
       return true;
     } catch (e) {
       state = state.copyWith(
-        errorMessage: _parseError(e),
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       );
       return false;
     }
@@ -113,15 +114,13 @@ class AuthController extends StateNotifier<AuthState> {
   Future<String?> forgotPassword(String email) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
-      final res = await authRepository.forgotPassword(
-        email.trim().toLowerCase(),
-      );
+      final res = await authRepository.forgotPassword(email.trim().toLowerCase());
       state = state.copyWith(status: AuthStatus.unauthenticated);
-      return res['otp']?.toString() ?? '123456';
+      return res['otp']?.toString();
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: _parseError(e),
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       );
       return null;
     }
@@ -145,24 +144,10 @@ class AuthController extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: _parseError(e),
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
       );
       return false;
     }
-  }
-
-  String _parseError(dynamic e) {
-    if (e is ServerException) return e.message;
-    if (e is NetworkException) return e.message;
-    if (e is UnauthorizedException) return e.message;
-    if (e is CacheException) return e.message;
-    final str = e.toString();
-    return str
-        .replaceAll('Exception: ', '')
-        .replaceAll('ServerException: ', '')
-        .replaceAll('NetworkException: ', '')
-        .replaceAll('UnauthorizedException: ', '')
-        .trim();
   }
 
   /// Clears secure token, resets auth state, and invalidates session providers.
@@ -172,9 +157,8 @@ class AuthController extends StateNotifier<AuthState> {
   }
 }
 
-final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
-  (ref) {
-    final authRepo = ref.watch(authRepositoryProvider);
-    return AuthController(authRepository: authRepo, ref: ref);
-  },
-);
+
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+  final authRepo = ref.watch(authRepositoryProvider);
+  return AuthController(authRepository: authRepo, ref: ref);
+});

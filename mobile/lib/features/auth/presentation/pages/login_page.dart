@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
+import 'package:vehica_mobile/core/services/vehica_feedback.dart';
 import 'package:vehica_mobile/core/utils/validators.dart';
 import 'package:vehica_mobile/core/widgets/vehica_button.dart';
 import 'package:vehica_mobile/core/widgets/vehica_text_field.dart';
@@ -43,12 +44,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success = await ref
-        .read(authControllerProvider.notifier)
-        .login(_emailController.text.trim(), _passwordController.text);
+    final success = await ref.read(authControllerProvider.notifier).login(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
 
-    if (success && mounted) {
-      context.go('/profile');
+    if (!mounted) return;
+
+    if (success) {
+      final authState = ref.read(authControllerProvider);
+      VehicaFeedback.showSuccess('Đăng nhập thành công! Chào mừng bạn quay trở lại.');
+      if (authState.isAdmin) {
+        context.go('/admin/dashboard');
+      } else {
+        context.go('/home');
+      }
+    } else {
+      final authState = ref.read(authControllerProvider);
+      VehicaFeedback.showError(
+        authState.errorMessage ?? 'Đăng nhập không thành công. Vui lòng kiểm tra lại tài khoản.',
+      );
     }
   }
 
@@ -64,95 +79,106 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              children: [
-                SizedBox(height: size.height * 0.06),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 460),
+              child: Column(
+                children: [
+                  SizedBox(height: (size.height * 0.04).clamp(16.0, 40.0)),
 
-                // ── Brand mark ──────────────────────────────────────────────
-                _BrandMark(),
-                const SizedBox(height: 32),
+                  // ── Brand mark ──────────────────────────────────────────────
+                  _BrandMark(),
+                  const SizedBox(height: 32),
 
-                // ── Login card ──────────────────────────────────────────────
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text('Đăng nhập', style: theme.textTheme.headlineSmall),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Tiếp tục trải nghiệm dịch vụ thuê xe',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 24),
+                  // ── Login card ──────────────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Đăng nhập',
+                            style: theme.textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tiếp tục trải nghiệm dịch vụ thuê xe',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 24),
 
-                        // Error banner
-                        if (authState.status == AuthStatus.error &&
-                            authState.errorMessage != null) ...[
-                          _ErrorBanner(message: authState.errorMessage!),
-                          const SizedBox(height: 16),
-                        ],
+                          // Error banner
+                          if (authState.status == AuthStatus.error &&
+                              authState.errorMessage != null) ...[
+                            _ErrorBanner(message: authState.errorMessage!),
+                            const SizedBox(height: 16),
+                          ],
 
-                        VehicaTextField(
-                          label: 'Email',
-                          hint: 'name@example.com',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          prefixIcon: Icons.email_outlined,
-                          validator: VehicaValidators.validateEmail,
-                        ),
-                        const SizedBox(height: 14),
+                          VehicaTextField(
+                            label: 'Email',
+                            hint: 'name@example.com',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            prefixIcon: Icons.email_outlined,
+                            validator: VehicaValidators.validateEmail,
+                          ),
+                          const SizedBox(height: 14),
 
-                        VehicaTextField(
-                          label: 'Mật khẩu',
-                          hint: 'Tối thiểu 8 ký tự',
-                          controller: _passwordController,
-                          isPassword: true,
-                          prefixIcon: Icons.lock_outline_rounded,
-                          validator: VehicaValidators.validatePassword,
-                        ),
-                        const SizedBox(height: 8),
+                          VehicaTextField(
+                            label: 'Mật khẩu',
+                            hint: 'Tối thiểu 8 ký tự',
+                            controller: _passwordController,
+                            isPassword: true,
+                            textInputAction: TextInputAction.done,
+                            prefixIcon: Icons.lock_outline_rounded,
+                            validator: VehicaValidators.validatePassword,
+                            onFieldSubmitted: (_) => _handleLogin(),
+                          ),
+                          const SizedBox(height: 8),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => context.push('/forgot-password'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                final email = _emailController.text.trim();
+                                final route = email.isNotEmpty
+                                    ? '/forgot-password?email=${Uri.encodeComponent(email)}'
+                                    : '/forgot-password';
+                                context.push(route);
+                              },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                minimumSize: const Size(50, 30),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              minimumSize: const Size(50, 30),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: Text(
-                              'Quên mật khẩu?',
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              child: Text(
+                                'Quên mật khẩu?',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        VehicaButton(
-                          text: 'Đăng nhập',
-                          isLoading: authState.isLoading,
-                          onPressed: _handleLogin,
-                        ),
-                      ],
+                          VehicaButton(
+                            text: 'Đăng nhập',
+                            isLoading: authState.isLoading,
+                            onPressed: _handleLogin,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 const SizedBox(height: 16),
 
                 // ── Quick fill (dev helper) ─────────────────────────────────
@@ -166,12 +192,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         _passwordController.text = 'admin123456';
                       },
                     ),
-                    Container(
-                      width: 1,
-                      height: 14,
-                      color: AppColors.borderLight,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                    ),
+                    Container(width: 1, height: 14, color: AppColors.borderLight,
+                        margin: const EdgeInsets.symmetric(horizontal: 10)),
                     _QuickFill(
                       label: 'Khách',
                       onTap: () {
@@ -187,13 +209,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Chưa có tài khoản? ',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 14,
-                      ),
-                    ),
+                    Text('Chưa có tài khoản? ',
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
                     GestureDetector(
                       onTap: () => context.push('/register'),
                       child: Text(
@@ -213,7 +230,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -228,11 +246,7 @@ class _BrandMark extends StatelessWidget {
           width: 68,
           height: 68,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, Color(0xFF14B8A6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -242,11 +256,7 @@ class _BrandMark extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.directions_car_rounded,
-            color: Colors.white,
-            size: 34,
-          ),
+          child: const Icon(Icons.directions_car_rounded, color: Colors.white, size: 34),
         ),
         const SizedBox(height: 14),
         const Text(
@@ -288,17 +298,10 @@ class _ErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: AppColors.error,
-            size: 18,
-          ),
+          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: AppColors.error, fontSize: 13),
-            ),
+            child: Text(message, style: const TextStyle(color: AppColors.error, fontSize: 13)),
           ),
         ],
       ),

@@ -55,10 +55,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mật khẩu xác nhận không khớp'),
-          backgroundColor: AppColors.error,
-        ),
+        const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
       );
       return;
     }
@@ -70,25 +67,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           phone: _phoneController.text.trim(),
         );
 
-    if (!mounted) return;
-
-    if (success) {
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
-          backgroundColor: AppColors.primary,
-        ),
+        const SnackBar(content: Text('Đăng ký thành công! Vui lòng đăng nhập.')),
       );
       context.pop();
-    } else {
-      final errorMsg = ref.read(authControllerProvider).errorMessage ??
-          'Đăng ký thất bại. Vui lòng thử lại.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMsg),
-          backgroundColor: AppColors.error,
-        ),
-      );
     }
   }
 
@@ -107,153 +90,163 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // ── Header info ───────────────────────────────────────────────
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryMuted,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.person_add_rounded, color: Colors.white, size: 20),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                children: [
+                  // ── Header info ───────────────────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryMuted,
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.person_add_rounded, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Tạo tài khoản Vehica',
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    color: AppColors.primaryDark,
+                                  )),
+                              Text('Điền thông tin để bắt đầu thuê xe',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.primaryDark.withValues(alpha: 0.7),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Form card ─────────────────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: _formKey,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text('Tạo tài khoản Vehica',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: AppColors.primaryDark,
-                              )),
-                          Text('Điền thông tin để bắt đầu thuê xe',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.primaryDark.withValues(alpha: 0.7),
-                              )),
+                          if (authState.status == AuthStatus.error && authState.errorMessage != null) ...[
+                            _ErrorBanner(message: authState.errorMessage!),
+                            const SizedBox(height: 16),
+                          ],
+
+                          VehicaTextField(
+                            label: 'Họ và tên',
+                            hint: 'Nguyễn Văn A',
+                            controller: _fullNameController,
+                            textInputAction: TextInputAction.next,
+                            prefixIcon: Icons.person_outline_rounded,
+                            validator: VehicaValidators.validateFullName,
+                          ),
+                          const SizedBox(height: 14),
+
+                          VehicaTextField(
+                            label: 'Email',
+                            hint: 'name@example.com',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            prefixIcon: Icons.email_outlined,
+                            validator: VehicaValidators.validateEmail,
+                          ),
+                          const SizedBox(height: 14),
+
+                          VehicaTextField(
+                            label: 'Số điện thoại',
+                            hint: '0901 234 567',
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
+                            prefixIcon: Icons.phone_outlined,
+                            validator: VehicaValidators.validatePhone,
+                          ),
+                          const SizedBox(height: 14),
+
+                          VehicaTextField(
+                            label: 'Mật khẩu',
+                            hint: 'Tối thiểu 8 ký tự',
+                            controller: _passwordController,
+                            isPassword: true,
+                            textInputAction: TextInputAction.next,
+                            prefixIcon: Icons.lock_outline_rounded,
+                            validator: VehicaValidators.validatePassword,
+                          ),
+                          const SizedBox(height: 14),
+
+                          VehicaTextField(
+                            label: 'Xác nhận mật khẩu',
+                            hint: 'Nhập lại mật khẩu',
+                            controller: _confirmPasswordController,
+                            isPassword: true,
+                            textInputAction: TextInputAction.done,
+                            prefixIcon: Icons.lock_outline_rounded,
+                            onFieldSubmitted: (_) => _handleRegister(),
+                            validator: (val) {
+                              if (val != _passwordController.text) {
+                                return 'Mật khẩu không khớp';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+
+                          VehicaButton(
+                            text: 'Tạo tài khoản',
+                            isLoading: authState.isLoading,
+                            onPressed: _handleRegister,
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+                  ),
+                  const SizedBox(height: 20),
 
-              // ── Form card ─────────────────────────────────────────────────
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.borderLight),
-                ),
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (authState.status == AuthStatus.error && authState.errorMessage != null) ...[
-                        _ErrorBanner(message: authState.errorMessage!),
-                        const SizedBox(height: 16),
-                      ],
-
-                      VehicaTextField(
-                        label: 'Họ và tên',
-                        hint: 'Nguyễn Văn A',
-                        controller: _fullNameController,
-                        prefixIcon: Icons.person_outline_rounded,
-                        validator: VehicaValidators.validateFullName,
-                      ),
-                      const SizedBox(height: 14),
-
-                      VehicaTextField(
-                        label: 'Email',
-                        hint: 'name@example.com',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email_outlined,
-                        validator: VehicaValidators.validateEmail,
-                      ),
-                      const SizedBox(height: 14),
-
-                      VehicaTextField(
-                        label: 'Số điện thoại',
-                        hint: '0901 234 567',
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: Icons.phone_outlined,
-                        validator: VehicaValidators.validatePhone,
-                      ),
-                      const SizedBox(height: 14),
-
-                      VehicaTextField(
-                        label: 'Mật khẩu',
-                        hint: 'Tối thiểu 8 ký tự',
-                        controller: _passwordController,
-                        isPassword: true,
-                        prefixIcon: Icons.lock_outline_rounded,
-                        validator: VehicaValidators.validatePassword,
-                      ),
-                      const SizedBox(height: 14),
-
-                      VehicaTextField(
-                        label: 'Xác nhận mật khẩu',
-                        hint: 'Nhập lại mật khẩu',
-                        controller: _confirmPasswordController,
-                        isPassword: true,
-                        prefixIcon: Icons.lock_outline_rounded,
-                        validator: (val) {
-                          if (val != _passwordController.text) {
-                            return 'Mật khẩu không khớp';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      VehicaButton(
-                        text: 'Tạo tài khoản',
-                        isLoading: authState.isLoading,
-                        onPressed: _handleRegister,
+                      Text('Đã có tài khoản? ',
+                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
+                      GestureDetector(
+                        onTap: () => context.pop(),
+                        child: Text(
+                          'Đăng nhập',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Đã có tài khoản? ',
-                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Text(
-                      'Đăng nhập',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
         ),
       ),
