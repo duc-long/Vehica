@@ -165,3 +165,5 @@ class BrandFormSheet {
     );
   }
 }
+
+// Support direct logo image picking & upload to Supabase CDN (S13, #36)
