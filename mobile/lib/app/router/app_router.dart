@@ -6,7 +6,9 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.
 import 'package:vehica_mobile/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/register_page.dart';
+import 'package:vehica_mobile/features/dashboard/presentation/pages/admin_dashboard_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
+import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 
 // ── Transition builders ────────────────────────────────────────────────────────
 
@@ -130,6 +132,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         pageBuilder: (context, state) =>
             _slideUpPage(const ProfilePage(), state),
+      ),
+
+      // ── Admin ─────────────────────────────────────────────────────────────
+      GoRoute(
+        path: '/admin/dashboard',
+        pageBuilder: (context, state) =>
+            _fadePage(const AdminDashboardPage(), state),
+      ),
+      GoRoute(
+        path: '/admin/users',
+        pageBuilder: (context, state) =>
+            _slideRightPage(const AdminUserManagementPage(), state),
       ),
     ],
   );
