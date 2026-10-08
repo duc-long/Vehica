@@ -8,8 +8,7 @@
 
 package com.vehica.user.service;
 
-// TODO: Restore when booking module is ready
-// import com.vehica.booking.repository.BookingRepository;
+import com.vehica.booking.repository.BookingRepository;
 import com.vehica.common.enums.UserStatus;
 import com.vehica.common.exception.ConflictException;
 import com.vehica.common.exception.ResourceNotFoundException;
@@ -33,8 +32,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    // TODO: Restore when booking module is ready
-    // private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
 
     // ==============================================================================
@@ -182,11 +180,13 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với ID: " + userId));
 
-        // TODO: Restore BookingRepository check when booking module is ready
-        // long bookingCount = bookingRepository.countByUserId(userId);
-        // Safe fallback: always soft-block to preserve referential integrity
-        user.setStatus(UserStatus.BLOCKED);
-        userRepository.save(user);
+        long bookingCount = bookingRepository.countByUserId(userId);
+        if (bookingCount > 0) {
+            user.setStatus(UserStatus.BLOCKED);
+            userRepository.save(user);
+        } else {
+            userRepository.delete(user);
+        }
     }
 
     // ==============================================================================
