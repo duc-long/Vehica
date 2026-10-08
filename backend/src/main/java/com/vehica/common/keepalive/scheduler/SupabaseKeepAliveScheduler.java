@@ -28,7 +28,7 @@ public class SupabaseKeepAliveScheduler {
 
     /**
      * Periodic scheduled keep-alive ping.
-     * Default: Every 4 hours (0 0 *\/4 * * *).
+     * Default: Every 4 hours (0 0 */4 * * *).
      * Supabase pauses projects after 7 days of inactivity; pinging every 4 hours ensures 100% active state.
      */
     @Scheduled(
