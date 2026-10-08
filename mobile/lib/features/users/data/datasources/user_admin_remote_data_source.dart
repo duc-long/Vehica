@@ -1,7 +1,16 @@
+// ==============================================================================
+// VEHICA CAR RENTAL SYSTEM - CLEAN ARCHITECTURE MOBILE APP
+// ==============================================================================
+// LAYER             : Data Layer (Remote Data Source)
+// USE CASES         : UC-08 (Admin User CRUD), UC-08b (Toggle Active/Blocked & Delete)
+// ENDPOINTS         : /api/admin/users
+// ==============================================================================
+
 import 'package:vehica_mobile/core/constants/api_endpoints.dart';
 import 'package:vehica_mobile/core/network/api_client.dart';
 import 'package:vehica_mobile/features/auth/data/models/user_model.dart';
 
+/// Performs raw HTTP calls for admin user management. Contains no business logic.
 class UserAdminRemoteDataSource {
   final ApiClient apiClient;
 
@@ -41,5 +50,9 @@ class UserAdminRemoteDataSource {
       data: {'status': status},
     );
     return UserModel.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  Future<void> deleteUser(String id) async {
+    await apiClient.delete(ApiEndpoints.adminDeleteUser(id));
   }
 }

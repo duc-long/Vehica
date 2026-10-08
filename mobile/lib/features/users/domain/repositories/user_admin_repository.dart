@@ -7,7 +7,9 @@ abstract class UserAdminRepository {
     int page = 0,
     int size = 10,
   });
+
   Future<UserEntity> createUser(Map<String, dynamic> data);
   Future<UserEntity> updateUser(String id, Map<String, dynamic> data);
   Future<UserEntity> updateUserStatus(String id, String status);
+  Future<void> deleteUser(String id);
 }
