@@ -197,51 +197,46 @@ public class AuthService {
         String inputOtp = request.getOtp().trim();
         OffsetDateTime now = OffsetDateTime.now();
 
-        // Universal demo OTP fallback for rapid evaluation
-        boolean isDemoOtp = "123456".equals(inputOtp);
-
         Optional<PasswordResetOtp> otpOpt =
                 otpRepository.findTopByEmailAndIsUsedFalseOrderByCreatedAtDesc(email);
 
-        if (otpOpt.isEmpty() && !isDemoOtp) {
+        if (otpOpt.isEmpty()) {
             throw new BadRequestException("Không tìm thấy yêu cầu đặt lại mật khẩu hoặc mã OTP đã hết hạn/đã sử dụng. Vui lòng xin mã mới.");
         }
 
-        if (otpOpt.isPresent()) {
-            PasswordResetOtp otpEntity = otpOpt.get();
+        PasswordResetOtp otpEntity = otpOpt.get();
 
-            // 1. Check expiration from the database
-            if (now.isAfter(otpEntity.getExpiresAt())) {
-                otpEntity.setUsed(true);
-                otpEntity.setUsedAt(now);
-                otpRepository.save(otpEntity);
-                throw new BadRequestException("Mã xác thực OTP đã hết hạn (sau 5 phút). Vui lòng yêu cầu mã mới.");
-            }
-
-            // 2. Anti-Brute-force: Check the number of incorrect attempts from the database
-            if (!otpEntity.getOtpCode().equals(inputOtp) && !isDemoOtp) {
-                int attempts = otpEntity.getFailedAttempts() + 1;
-                otpEntity.setFailedAttempts(attempts);
-                if (attempts >= MAX_FAILED_ATTEMPTS) {
-                    otpEntity.setUsed(true);
-                    otpEntity.setUsedAt(now);
-                    otpRepository.save(otpEntity);
-                    throw new BadRequestException(
-                            "Bạn đã nhập sai mã OTP quá " + MAX_FAILED_ATTEMPTS + " lần. Mã xác thực đã bị hủy vì lý do bảo mật. Vui lòng xin mã mới."
-                    );
-                }
-                otpRepository.save(otpEntity);
-                int remaining = MAX_FAILED_ATTEMPTS - attempts;
-                throw new BadRequestException(
-                        "Mã OTP không chính xác. Bạn còn " + remaining + " lần thử lại."
-                );
-            }
-
-            // 3. Mark OTP as used in the database (Single-use token)
+        // 1. Check expiration from the database
+        if (now.isAfter(otpEntity.getExpiresAt())) {
             otpEntity.setUsed(true);
             otpEntity.setUsedAt(now);
             otpRepository.save(otpEntity);
+            throw new BadRequestException("Mã xác thực OTP đã hết hạn (sau 5 phút). Vui lòng yêu cầu mã mới.");
         }
+
+        // 2. Anti-Brute-force: Check the number of incorrect attempts from the database
+        if (!otpEntity.getOtpCode().equals(inputOtp)) {
+            int attempts = otpEntity.getFailedAttempts() + 1;
+            otpEntity.setFailedAttempts(attempts);
+            if (attempts >= MAX_FAILED_ATTEMPTS) {
+                otpEntity.setUsed(true);
+                otpEntity.setUsedAt(now);
+                otpRepository.save(otpEntity);
+                throw new BadRequestException(
+                        "Bạn đã nhập sai mã OTP quá " + MAX_FAILED_ATTEMPTS + " lần. Mã xác thực đã bị hủy vì lý do bảo mật. Vui lòng xin mã mới."
+                );
+            }
+            otpRepository.save(otpEntity);
+            int remaining = MAX_FAILED_ATTEMPTS - attempts;
+            throw new BadRequestException(
+                    "Mã OTP không chính xác. Bạn còn " + remaining + " lần thử lại."
+            );
+        }
+
+        // 3. Mark OTP as used in the database (Single-use token)
+        otpEntity.setUsed(true);
+        otpEntity.setUsedAt(now);
+        otpRepository.save(otpEntity);
 
         // Update with new BCrypt encrypted password
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
