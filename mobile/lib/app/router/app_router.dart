@@ -5,6 +5,7 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_contro
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
+import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
 
@@ -93,6 +94,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) => _fadePage(const LoginPage(), state),
+      ),
+      GoRoute(
+        path: '/vehicles',
+        pageBuilder: (context, state) {
+          final typeId = state.uri.queryParameters['typeId'];
+          final brand = state.uri.queryParameters['brand'];
+          final keyword = state.uri.queryParameters['keyword'];
+          final seats = int.tryParse(state.uri.queryParameters['seats'] ?? '');
+          return _slideRightPage(
+            VehicleCatalogPage(
+              initialTypeId: typeId,
+              initialBrand: brand,
+              initialKeyword: keyword,
+              initialSeatCapacity: seats,
+            ),
+            state,
+          );
+        },
       ),
       GoRoute(
         path: '/profile',

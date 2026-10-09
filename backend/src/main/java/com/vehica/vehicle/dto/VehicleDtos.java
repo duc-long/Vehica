@@ -54,6 +54,7 @@ public class VehicleDtos {
         private VehicleStatus status;
         private String primaryImageUrl;
         private VehicleTypeDto type;
+        private List<String> features;
     }
 
     @Data
@@ -73,6 +74,7 @@ public class VehicleDtos {
         private String description;
         private VehicleTypeDto type;
         private List<VehicleImageDto> images;
+        private List<String> features;
         private OffsetDateTime createdAt;
         private OffsetDateTime updatedAt;
     }
@@ -120,6 +122,8 @@ public class VehicleDtos {
         private String description;
 
         private String imageUrl;
+
+        private List<String> features;
     }
 
     @Data

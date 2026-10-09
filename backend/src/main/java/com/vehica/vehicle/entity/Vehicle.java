@@ -69,6 +69,12 @@ public class Vehicle {
     @Builder.Default
     private List<VehicleImage> images = new ArrayList<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "vehicle_features", joinColumns = @JoinColumn(name = "vehicle_id"))
+    @Column(name = "feature", nullable = false)
+    @Builder.Default
+    private List<String> features = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
