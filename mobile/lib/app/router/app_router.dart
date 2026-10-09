@@ -6,6 +6,7 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
+import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
 
 // ── Transition builders ────────────────────────────────────────────────────────
 
@@ -96,6 +97,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         pageBuilder: (context, state) => _slideRightPage(const ProfilePage(), state),
+      ),
+      GoRoute(
+        path: '/admin/brands',
+        pageBuilder: (context, state) => _slideRightPage(const AdminBrandManagementPage(), state),
       ),
       GoRoute(
         path: '/admin/users',
