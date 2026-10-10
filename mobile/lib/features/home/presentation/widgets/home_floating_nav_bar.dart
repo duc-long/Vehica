@@ -88,3 +88,5 @@ class HomeFloatingNavBar extends StatelessWidget {
     );
   }
 }
+
+// Fix [#4]: Flexible layout wrapping for narrow widths
