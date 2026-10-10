@@ -5,6 +5,7 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_contro
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
+import 'package:vehica_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
@@ -77,7 +78,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     refreshListenable: routerNotifier,
-    initialLocation: '/login',
+    initialLocation: '/home',
     redirect: (context, state) {
       final isAuth = routerNotifier.isAuthenticated;
       final isGuestAuthRoute = state.matchedLocation == '/login' ||
@@ -86,7 +87,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (!isAuth && !isGuestAuthRoute && !isForgotPasswordRoute) return '/login';
       if (isAuth && isGuestAuthRoute) {
-        return '/profile';
+        return '/home';
       }
       return null;
     },
@@ -94,6 +95,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) => _fadePage(const LoginPage(), state),
+      ),
+      GoRoute(
+        path: '/home',
+        pageBuilder: (context, state) => _fadePage(const HomePage(), state),
       ),
       GoRoute(
         path: '/vehicles',
