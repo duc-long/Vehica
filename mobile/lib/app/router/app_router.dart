@@ -7,6 +7,7 @@ import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
 import 'package:vehica_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
+import 'package:vehica_mobile/features/bookings/presentation/pages/create_booking_page.dart';
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
 
@@ -116,6 +117,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
             state,
           );
+        },
+      ),
+      GoRoute(
+        path: '/bookings/create',
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return _slideUpPage(CreateBookingPage(extraData: extra), state);
         },
       ),
       GoRoute(
