@@ -10,6 +10,9 @@ import 'package:vehica_mobile/features/vehicles/domain/repositories/vehicle_repo
 import 'package:vehica_mobile/features/brands/data/datasources/brand_remote_data_source.dart';
 import 'package:vehica_mobile/features/brands/data/repositories/brand_repository_impl.dart';
 import 'package:vehica_mobile/features/brands/domain/repositories/brand_repository.dart';
+import 'package:vehica_mobile/features/bookings/data/datasources/booking_remote_data_source.dart';
+import 'package:vehica_mobile/features/bookings/data/repositories/booking_repository_impl.dart';
+import 'package:vehica_mobile/features/bookings/domain/repositories/booking_repository.dart';
 import 'package:vehica_mobile/features/users/data/datasources/user_admin_remote_data_source.dart';
 import 'package:vehica_mobile/features/users/data/repositories/user_admin_repository_impl.dart';
 import 'package:vehica_mobile/features/users/domain/repositories/user_admin_repository.dart';
@@ -57,6 +60,17 @@ final brandRemoteDataSourceProvider = Provider<BrandRemoteDataSource>((ref) {
 final brandRepositoryProvider = Provider<BrandRepository>((ref) {
   final remote = ref.watch(brandRemoteDataSourceProvider);
   return BrandRepositoryImpl(remoteDataSource: remote);
+});
+
+// Booking Providers
+final bookingRemoteDataSourceProvider = Provider<BookingRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return BookingRemoteDataSource(apiClient: apiClient);
+});
+
+final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
+  final remote = ref.watch(bookingRemoteDataSourceProvider);
+  return BookingRepositoryImpl(remoteDataSource: remote);
 });
 
 // User Admin Providers
