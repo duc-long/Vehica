@@ -178,3 +178,5 @@ final adminBookingsControllerProvider =
   final repo = ref.watch(bookingRepositoryProvider);
   return AdminBookingsController(repository: repo, ref: ref);
 });
+
+// Fix [#10]: Range boundary handling for active booking query and responsive card extent
