@@ -8,6 +8,9 @@ import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.d
 import 'package:vehica_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
 import 'package:vehica_mobile/features/bookings/presentation/pages/create_booking_page.dart';
+import 'package:vehica_mobile/features/bookings/presentation/pages/my_bookings_page.dart';
+import 'package:vehica_mobile/features/bookings/presentation/pages/booking_detail_page.dart';
+import 'package:vehica_mobile/features/bookings/presentation/pages/admin_booking_management_page.dart';
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
 
@@ -125,6 +128,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>;
           return _slideUpPage(CreateBookingPage(extraData: extra), state);
         },
+      ),
+      GoRoute(
+        path: '/bookings',
+        pageBuilder: (context, state) => _slideRightPage(const MyBookingsPage(), state),
+      ),
+      GoRoute(
+        path: '/bookings/:id',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return _slideRightPage(BookingDetailPage(bookingId: id), state);
+        },
+      ),
+      GoRoute(
+        path: '/admin/bookings',
+        pageBuilder: (context, state) => _slideRightPage(const AdminBookingManagementPage(), state),
       ),
       GoRoute(
         path: '/profile',
