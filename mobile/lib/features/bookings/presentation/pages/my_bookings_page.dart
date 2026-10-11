@@ -27,82 +27,125 @@ class MyBookingsPage extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bookingsState = ref.watch(myBookingsControllerProvider);
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: AppBar(
-        title: Text(
-          'Đơn đặt xe của tôi',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/home');
+        }
+      },
+      child: Scaffold(
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
+        appBar: AppBar(
+          title: Text(
+            'Đơn đặt xe của tôi',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+          ),
+          leading: VehicaBackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
           ),
         ),
-        leading: const VehicaBackButton(),
-      ),
-      body: bookingsState.isLoading
-          ? LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth > 1100
-                    ? 3
-                    : constraints.maxWidth > 650
-                        ? 2
-                        : 1;
-                if (crossAxisCount > 1) {
-                  return GridView.builder(
+        body: bookingsState.isLoading
+            ? LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth > 1100
+                      ? 3
+                      : constraints.maxWidth > 650
+                      ? 2
+                      : 1;
+                  if (crossAxisCount > 1) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.7,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (_, __) => const BookingCardSkeleton(),
+                    );
+                  }
+                  return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 1.7,
-                    ),
                     itemCount: 4,
                     itemBuilder: (_, __) => const BookingCardSkeleton(),
                   );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                  itemCount: 4,
-                  itemBuilder: (_, __) => const BookingCardSkeleton(),
-                );
-              },
-            )
-          : RefreshIndicator(
-              color: AppColors.primaryLight,
-              onRefresh: () async {
-                await ref.read(myBookingsControllerProvider.notifier).loadMyBookings();
-              },
-              child: VehicaAsyncView<List<BookingSummaryEntity>>(
-                isLoading: false,
-                errorMessage: bookingsState.error?.toString(),
-                isEmpty: bookingsState.value?.isEmpty ?? true,
-                emptyMessage: 'Bạn chưa có đơn đặt xe nào',
-                emptyIcon: Icons.receipt_long_rounded,
-                action: VehicaButton(
-                  text: 'Tìm xe ngay',
-                  width: 160,
-                  onPressed: () => context.go('/home'),
-                ),
-                onRetry: () => ref.read(myBookingsControllerProvider.notifier).loadMyBookings(),
-                dataBuilder: (context) {
-                  final list = bookingsState.value!;
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final crossAxisCount = constraints.maxWidth > 1100
-                          ? 3
-                          : constraints.maxWidth > 650
-                              ? 2
-                              : 1;
-                      if (crossAxisCount > 1) {
-                        return GridView.builder(
+                },
+              )
+            : RefreshIndicator(
+                color: AppColors.primaryLight,
+                onRefresh: () async {
+                  await ref
+                      .read(myBookingsControllerProvider.notifier)
+                      .loadMyBookings();
+                },
+                child: VehicaAsyncView<List<BookingSummaryEntity>>(
+                  isLoading: false,
+                  errorMessage: bookingsState.error?.toString(),
+                  isEmpty: bookingsState.value?.isEmpty ?? true,
+                  emptyMessage: 'Bạn chưa có đơn đặt xe nào',
+                  emptyIcon: Icons.receipt_long_rounded,
+                  action: VehicaButton(
+                    text: 'Tìm xe ngay',
+                    width: 160,
+                    onPressed: () => context.go('/home'),
+                  ),
+                  onRetry: () => ref
+                      .read(myBookingsControllerProvider.notifier)
+                      .loadMyBookings(),
+                  dataBuilder: (context) {
+                    final list = bookingsState.value!;
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final crossAxisCount = constraints.maxWidth > 1100
+                            ? 3
+                            : constraints.maxWidth > 650
+                            ? 2
+                            : 1;
+                        if (crossAxisCount > 1) {
+                          return GridView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
+                            physics: const AlwaysScrollableScrollPhysics(
+                              parent: BouncingScrollPhysics(),
+                            ),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                  childAspectRatio: 1.7,
+                                ),
+                            itemCount: list.length,
+                            itemBuilder: (context, index) {
+                              final booking = list[index];
+                              return _BookingCard(
+                                booking: booking,
+                                isDark: isDark,
+                                margin: EdgeInsets.zero,
+                              );
+                            },
+                          );
+                        }
+                        return ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
-                          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 1.7,
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics(),
                           ),
                           itemCount: list.length,
                           itemBuilder: (context, index) {
@@ -110,28 +153,15 @@ class MyBookingsPage extends ConsumerWidget {
                             return _BookingCard(
                               booking: booking,
                               isDark: isDark,
-                              margin: EdgeInsets.zero,
                             );
                           },
                         );
-                      }
-                      return ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
-                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                        itemCount: list.length,
-                        itemBuilder: (context, index) {
-                          final booking = list[index];
-                          return _BookingCard(
-                            booking: booking,
-                            isDark: isDark,
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
+      ),
     );
   }
 }
@@ -198,7 +228,9 @@ class _BookingCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 14,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                           letterSpacing: 0.2,
                         ),
                       ),
@@ -209,7 +241,10 @@ class _BookingCard extends StatelessWidget {
               ),
             ),
 
-            Divider(height: 1, color: isDark ? AppColors.borderDark : AppColors.divider),
+            Divider(
+              height: 1,
+              color: isDark ? AppColors.borderDark : AppColors.divider,
+            ),
 
             // ── Card Body (Image + Vehicle Info) ────────────────────────────
             Padding(
@@ -221,10 +256,14 @@ class _BookingCard extends StatelessWidget {
                     width: 84,
                     height: 84,
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+                      color: isDark
+                          ? AppColors.surfaceVariantDark
+                          : AppColors.surfaceVariantLight,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                        color: isDark
+                            ? AppColors.borderDark
+                            : AppColors.borderLight,
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
@@ -247,7 +286,9 @@ class _BookingCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -258,7 +299,9 @@ class _BookingCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -267,7 +310,9 @@ class _BookingCard extends StatelessWidget {
                             Icon(
                               Icons.calendar_today_rounded,
                               size: 13,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary,
                             ),
                             const SizedBox(width: 5),
                             Expanded(
@@ -276,7 +321,9 @@ class _BookingCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -295,7 +342,9 @@ class _BookingCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceVariantDark.withValues(alpha: 0.6) : AppColors.backgroundLight,
+                color: isDark
+                    ? AppColors.surfaceVariantDark.withValues(alpha: 0.6)
+                    : AppColors.backgroundLight,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -307,7 +356,9 @@ class _BookingCard extends StatelessWidget {
                         'Thời gian thuê: ${booking.rentalDays} ngày',
                         style: TextStyle(
                           fontSize: 11,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 1),
@@ -328,14 +379,18 @@ class _BookingCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
                         Icons.chevron_right_rounded,
                         size: 18,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary,
                       ),
                     ],
                   ),

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
 import 'package:vehica_mobile/core/widgets/vehica_async_view.dart';
 import 'package:vehica_mobile/core/widgets/vehica_back_button.dart';
@@ -34,83 +35,104 @@ class AdminBookingManagementPage extends ConsumerWidget {
     final bookingsState = adminBookingsState.bookings;
     final currentFilter = adminBookingsState.statusFilter;
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: AppBar(
-        leading: const VehicaBackButton(),
-        title: const Text('Quản lý đơn đặt xe'),
-      ),
-      body: Column(
-        children: [
-          // ── Filter tabs ──────────────────────────────────────────────────
-          BookingStatusFilterBar(
-            currentFilter: currentFilter,
-            onFilterChanged: (filter) => ref
-                .read(adminBookingsControllerProvider.notifier)
-                .filterByStatus(filter),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/admin/dashboard');
+        }
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        appBar: AppBar(
+          leading: VehicaBackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/admin/dashboard');
+              }
+            },
           ),
+          title: const Text('Quản lý đơn đặt xe'),
+        ),
+        body: Column(
+          children: [
+            // ── Filter tabs ──────────────────────────────────────────────────
+            BookingStatusFilterBar(
+              currentFilter: currentFilter,
+              onFilterChanged: (filter) => ref
+                  .read(adminBookingsControllerProvider.notifier)
+                  .filterByStatus(filter),
+            ),
 
-          // ── Bookings list ─────────────────────────────────────────────────
-          Expanded(
-            child: VehicaAsyncView<List<BookingSummaryEntity>>(
-              isLoading: bookingsState.isLoading,
-              errorMessage: bookingsState.error != null
-                  ? 'Không thể tải danh sách đơn đặt xe. Vui lòng thử lại.'
-                  : null,
-              isEmpty: bookingsState.value?.isEmpty ?? true,
-              emptyMessage: 'Không có đơn đặt xe nào',
-              onRetry: () =>
-                  ref.read(adminBookingsControllerProvider.notifier).loadBookings(),
-              dataBuilder: (context) {
-                final list = bookingsState.value!;
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxisCount = constraints.maxWidth > 1150
-                        ? 3
-                        : constraints.maxWidth > 700
-                            ? 2
-                            : 1;
-                    if (crossAxisCount > 1) {
-                      return GridView.builder(
+            // ── Bookings list ─────────────────────────────────────────────────
+            Expanded(
+              child: VehicaAsyncView<List<BookingSummaryEntity>>(
+                isLoading: bookingsState.isLoading,
+                errorMessage: bookingsState.error != null
+                    ? 'Không thể tải danh sách đơn đặt xe. Vui lòng thử lại.'
+                    : null,
+                isEmpty: bookingsState.value?.isEmpty ?? true,
+                emptyMessage: 'Không có đơn đặt xe nào',
+                onRetry: () =>
+                    ref.read(adminBookingsControllerProvider.notifier).loadBookings(),
+                dataBuilder: (context) {
+                  final list = bookingsState.value!;
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final crossAxisCount = constraints.maxWidth > 1150
+                          ? 3
+                          : constraints.maxWidth > 700
+                              ? 2
+                              : 1;
+                      if (crossAxisCount > 1) {
+                        return GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            childAspectRatio: crossAxisCount == 3 ? 1.85 : 1.75,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            final booking = list[index];
+                            return AdminBookingCard(
+                              booking: booking,
+                              margin: EdgeInsets.zero,
+                              onTap: () => context.push('/bookings/${booking.id}'),
+                              onTransition: () =>
+                                  AdminBookingTransitionSheet.show(context, booking),
+                            );
+                          },
+                        );
+                      }
+                      return ListView.separated(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          childAspectRatio: crossAxisCount == 3 ? 1.85 : 1.75,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
                         itemCount: list.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final booking = list[index];
                           return AdminBookingCard(
                             booking: booking,
                             margin: EdgeInsets.zero,
+                            onTap: () => context.push('/bookings/${booking.id}'),
                             onTransition: () =>
                                 AdminBookingTransitionSheet.show(context, booking),
                           );
                         },
                       );
-                    }
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                      itemCount: list.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final booking = list[index];
-                        return AdminBookingCard(
-                          booking: booking,
-                          margin: EdgeInsets.zero,
-                          onTransition: () =>
-                              AdminBookingTransitionSheet.show(context, booking),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -57,5 +57,28 @@ void main() {
       // Verify no RenderFlex bottom overflow occurred
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('triggers onTap callback when card body is tapped', (tester) async {
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AdminBookingCard(
+              booking: mockBooking,
+              onTransition: () {},
+              onTap: () {
+                tapped = true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('VHC-20261002-1003'));
+      await tester.pump();
+
+      expect(tapped, isTrue);
+    });
   });
 }

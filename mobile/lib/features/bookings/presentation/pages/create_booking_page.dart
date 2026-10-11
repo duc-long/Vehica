@@ -257,7 +257,15 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () => context.go('/home'),
                     )
-                  : const VehicaBackButton()),
+                  : VehicaBackButton(
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/home');
+                        }
+                      },
+                    )),
         ),
         body: SafeArea(
           child: Column(
