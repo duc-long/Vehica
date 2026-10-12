@@ -1,3 +1,10 @@
+// ==============================================================================
+// VEHICA CAR RENTAL SYSTEM - CLEAN ARCHITECTURE MOBILE APP
+// ==============================================================================
+// SCREEN       : S02 - Profile Page
+// STYLE        : Dark Slate Luxury, Emerald Teal Accent
+// ==============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +19,7 @@ import 'package:vehica_mobile/features/profile/presentation/widgets/profile_avat
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_info_card.dart';
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_logout_tile.dart';
+import 'package:vehica_mobile/features/profile/presentation/widgets/profile_security_tile.dart';
 import 'package:vehica_mobile/features/profile/presentation/widgets/profile_stats_card.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -219,6 +227,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 isSaving: _isSaving,
                 onSave: _handleSave,
                 isDark: isDark,
+              ),
+              const SizedBox(height: 18),
+              ProfileSecurityTile(
+                isDark: isDark,
+                onTap: () => context.push('/forgot-password?email=${Uri.encodeComponent(user.email)}'),
               ),
               const SizedBox(height: 18),
               ProfileLogoutTile(
