@@ -5,6 +5,13 @@ import 'package:vehica_mobile/features/auth/data/models/user_model.dart';
 import 'package:vehica_mobile/features/auth/domain/entities/user_entity.dart';
 import 'package:vehica_mobile/features/auth/domain/repositories/auth_repository.dart';
 
+// ==============================================================================
+// VEHICA CAR RENTAL SYSTEM - CLEAN ARCHITECTURE MOBILE APP
+// ==============================================================================
+// LAYER             : Data Layer (Repository Implementation)
+// USE CASES         : UC-01 (Login), UC-02 (Register), UC-01b (Forgot/Reset Password), UC-03 (Profile)
+// ==============================================================================
+
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final SecureStorageService storageService;
@@ -28,6 +35,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserEntity> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+  }) async {
+    return await remoteDataSource.register(
+      email: email,
+      password: password,
+      fullName: fullName,
+      phone: phone,
+    );
+  }
+
+  @override
   Future<UserEntity?> getCurrentUser() async {
     final token = await storageService.getToken();
     if (token == null || token.isEmpty) {
@@ -48,7 +70,49 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserEntity> updateProfile({
+    required String fullName,
+    required String phone,
+    String? avatarUrl,
+  }) async {
+    final updated = await remoteDataSource.updateProfile(
+      fullName: fullName,
+      phone: phone,
+      avatarUrl: avatarUrl,
+    );
+    await storageService.saveUserData(jsonEncode(updated.toJson()));
+    return updated;
+  }
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    return await remoteDataSource.forgotPassword(email);
+  }
+
+  @override
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    await remoteDataSource.verifyOtp(email: email, otp: otp);
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    await remoteDataSource.resetPassword(
+      email: email,
+      otp: otp,
+      newPassword: newPassword,
+    );
+  }
+
+  @override
   Future<void> logout() async {
     await storageService.clearAll();
   }
 }
+
