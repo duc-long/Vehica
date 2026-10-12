@@ -43,6 +43,31 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+  }) async {
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      await authRepository.register(
+        email: email,
+        password: password,
+        fullName: fullName,
+        phone: phone,
+      );
+      state = state.copyWith(status: AuthStatus.unauthenticated);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     state = state.copyWith(status: AuthStatus.loading);
     try {

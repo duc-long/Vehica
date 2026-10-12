@@ -1,12 +1,16 @@
 package com.vehica.user.service;
 
+import com.vehica.common.enums.UserRole;
 import com.vehica.common.enums.UserStatus;
 import com.vehica.common.exception.BadRequestException;
+import com.vehica.common.exception.ConflictException;
 import com.vehica.common.exception.ForbiddenException;
 import com.vehica.security.JwtTokenProvider;
 import com.vehica.security.UserPrincipal;
 import com.vehica.user.dto.AuthResponse;
 import com.vehica.user.dto.LoginRequest;
+import com.vehica.user.dto.RegisterRequest;
+import com.vehica.user.dto.UserDto;
 import com.vehica.user.entity.User;
 import com.vehica.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,25 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserService userService;
+
+    @Transactional
+    public UserDto register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email đã tồn tại. Hãy dùng email khác.");
+        }
+
+        User user = User.builder()
+                .email(request.getEmail().toLowerCase().trim())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName().trim())
+                .phone(request.getPhone().trim())
+                .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        return userService.mapToDto(savedUser);
+    }
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication;

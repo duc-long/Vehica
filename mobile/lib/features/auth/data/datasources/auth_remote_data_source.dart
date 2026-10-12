@@ -15,6 +15,24 @@ class AuthRemoteDataSource {
     return response['data'] as Map<String, dynamic>;
   }
 
+  Future<UserModel> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+  }) async {
+    final response = await apiClient.post(
+      ApiEndpoints.register,
+      data: {
+        'email': email,
+        'password': password,
+        'fullName': fullName,
+        'phone': phone,
+      },
+    );
+    return UserModel.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
   Future<UserModel> getProfile() async {
     final response = await apiClient.get(ApiEndpoints.profile);
     return UserModel.fromJson(response['data'] as Map<String, dynamic>);

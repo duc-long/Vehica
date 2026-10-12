@@ -28,6 +28,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserEntity> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required String phone,
+  }) async {
+    return await remoteDataSource.register(
+      email: email,
+      password: password,
+      fullName: fullName,
+      phone: phone,
+    );
+  }
+
+  @override
   Future<UserEntity?> getCurrentUser() async {
     final token = await storageService.getToken();
     if (token == null || token.isEmpty) {
