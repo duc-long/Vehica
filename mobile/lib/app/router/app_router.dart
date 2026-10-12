@@ -5,6 +5,7 @@ import 'package:vehica_mobile/features/auth/presentation/controllers/auth_contro
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/register_page.dart';
+import 'package:vehica_mobile/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
 import 'package:vehica_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
@@ -110,6 +111,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           state,
         ),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        pageBuilder: (context, state) {
+          final email = state.uri.queryParameters['email'];
+          return _slideRightPage(ForgotPasswordPage(initialEmail: email), state);
+        },
       ),
       GoRoute(
         path: '/home',

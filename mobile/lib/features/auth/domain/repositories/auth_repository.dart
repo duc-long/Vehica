@@ -9,5 +9,18 @@ abstract class AuthRepository {
     required String phone,
   });
   Future<UserEntity?> getCurrentUser();
+  Future<UserEntity> updateProfile({
+    required String fullName,
+    required String phone,
+    String? avatarUrl,
+  });
+  Future<Map<String, dynamic>> forgotPassword(String email);
+  Future<void> verifyOtp({required String email, required String otp});
+  Future<void> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  });
   Future<void> logout();
 }
+
