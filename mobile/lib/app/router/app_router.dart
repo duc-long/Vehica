@@ -9,6 +9,7 @@ import 'package:vehica_mobile/features/auth/presentation/pages/forgot_password_p
 import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.dart';
 import 'package:vehica_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
+import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_detail_page.dart';
 import 'package:vehica_mobile/features/bookings/presentation/pages/create_booking_page.dart';
 import 'package:vehica_mobile/features/bookings/presentation/pages/my_bookings_page.dart';
 import 'package:vehica_mobile/features/bookings/presentation/pages/booking_detail_page.dart';
@@ -139,6 +140,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
             state,
           );
+        },
+      ),
+      GoRoute(
+        path: '/vehicles/:id',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return _slideRightPage(VehicleDetailPage(vehicleId: id), state);
         },
       ),
       GoRoute(
