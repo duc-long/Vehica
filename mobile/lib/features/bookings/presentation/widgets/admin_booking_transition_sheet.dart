@@ -18,6 +18,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
     final allowedNextStatuses = <String>[];
 
     if (status == 'PENDING') allowedNextStatuses.add('CONFIRMED');
+    if (status == 'CONFIRMED') allowedNextStatuses.add('PICKED_UP');
 
     if (allowedNextStatuses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,6 +92,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
     final allowedNextStatuses = <String>[];
 
     if (status == 'PENDING') allowedNextStatuses.add('CONFIRMED');
+    if (status == 'CONFIRMED') allowedNextStatuses.add('PICKED_UP');
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
