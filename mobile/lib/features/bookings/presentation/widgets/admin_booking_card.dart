@@ -224,3 +224,5 @@ class AdminBookingCard extends StatelessWidget {
     );
   }
 }
+
+// Fix [#30]: Wrap and Expanded constraints preventing RenderFlex overflow
