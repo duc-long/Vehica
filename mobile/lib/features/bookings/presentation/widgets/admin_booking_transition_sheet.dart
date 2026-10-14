@@ -5,6 +5,7 @@ import 'package:vehica_mobile/core/widgets/vehica_status_chip.dart';
 import 'package:vehica_mobile/features/bookings/domain/entities/booking_entity.dart';
 import 'package:vehica_mobile/features/bookings/presentation/controllers/booking_controllers.dart';
 
+/// Modal bottom sheet allowing admins to transition booking state per BR-16.
 class AdminBookingTransitionSheet extends ConsumerWidget {
   final BookingSummaryEntity booking;
 
@@ -17,8 +18,8 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
     final status = booking.status.toUpperCase();
     final allowedNextStatuses = <String>[];
 
-    if (status == 'PENDING') allowedNextStatuses.add('CONFIRMED');
-    if (status == 'CONFIRMED') allowedNextStatuses.add('PICKED_UP');
+    if (status == 'PENDING') allowedNextStatuses.addAll(['CONFIRMED', 'CANCELLED']);
+    if (status == 'CONFIRMED') allowedNextStatuses.addAll(['PICKED_UP', 'CANCELLED']);
     if (status == 'PICKED_UP') allowedNextStatuses.add('COMPLETED');
 
     if (allowedNextStatuses.isEmpty) {
@@ -78,7 +79,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
         };
       default:
         return {
-          'title': 'Chuyển trạng thái: ' + status,
+          'title': 'Chuyển trạng thái: $status',
           'subtitle': 'Cập nhật tiến trình đơn',
           'icon': Icons.arrow_forward_rounded,
           'color': AppColors.primary,
@@ -92,8 +93,8 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
     final status = booking.status.toUpperCase();
     final allowedNextStatuses = <String>[];
 
-    if (status == 'PENDING') allowedNextStatuses.add('CONFIRMED');
-    if (status == 'CONFIRMED') allowedNextStatuses.add('PICKED_UP');
+    if (status == 'PENDING') allowedNextStatuses.addAll(['CONFIRMED', 'CANCELLED']);
+    if (status == 'CONFIRMED') allowedNextStatuses.addAll(['PICKED_UP', 'CANCELLED']);
     if (status == 'PICKED_UP') allowedNextStatuses.add('COMPLETED');
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -104,6 +105,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Handle
           Center(
             child: Container(
               width: 36,
@@ -171,14 +173,14 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
                       .updateStatus(
                         booking.id,
                         nextStatus,
-                        reason: 'Quản trị viên thực hiện: ' + (action['title'] as String),
+                        reason: 'Quản trị viên thực hiện: ${action['title']}',
                       );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
                           success
-                              ? 'Đã thực hiện: ' + (action['title'] as String) + '!'
+                              ? 'Đã thực hiện: ${action['title']}!'
                               : 'Lỗi cập nhật trạng thái',
                         ),
                         backgroundColor: success ? AppColors.success : AppColors.error,
