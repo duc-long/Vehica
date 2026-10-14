@@ -488,3 +488,5 @@ class AdminVehicleFormSheet {
     );
   }
 }
+
+// Support editing vehicle license plate, daily rate, and specs (S07, #13)
