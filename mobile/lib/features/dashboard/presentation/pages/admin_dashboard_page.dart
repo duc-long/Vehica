@@ -7,6 +7,7 @@ import 'package:vehica_mobile/features/dashboard/presentation/controllers/dashbo
 import 'package:vehica_mobile/features/dashboard/presentation/widgets/admin_kpi_grid.dart';
 import 'package:vehica_mobile/features/dashboard/presentation/widgets/admin_nav_hub.dart';
 import 'package:vehica_mobile/features/dashboard/presentation/widgets/admin_revenue_banner.dart';
+import 'package:vehica_mobile/features/dashboard/presentation/widgets/admin_utilization_gauge.dart';
 
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
@@ -66,6 +67,8 @@ class AdminDashboardPage extends ConsumerWidget {
                     data: (summary) => Column(
                       children: [
                         AdminRevenueBanner(summary: summary),
+                        const SizedBox(height: 12),
+                        AdminUtilizationGauge(summary: summary),
                         const SizedBox(height: 16),
                         AdminKpiGrid(summary: summary),
                       ],
