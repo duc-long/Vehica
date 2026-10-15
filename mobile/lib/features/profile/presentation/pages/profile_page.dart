@@ -231,7 +231,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               const SizedBox(height: 18),
               ProfileSecurityTile(
                 isDark: isDark,
-                onTap: () => context.push('/forgot-password'),
+                onTap: () => context.push('/forgot-password?email=${Uri.encodeComponent(user.email)}'),
               ),
               const SizedBox(height: 18),
               ProfileLogoutTile(

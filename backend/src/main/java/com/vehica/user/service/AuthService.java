@@ -47,6 +47,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final UserService userService;
     private final PasswordResetOtpRepository otpRepository;
+    private final com.vehica.common.service.EmailService emailService;
 
     private static final int OTP_EXPIRY_MINUTES = 5;          // OTP validity window: 5 minutes
     private static final int OTP_COOLDOWN_SECONDS = 60;        // Rate limiting: 60s cooldown between OTP requests
@@ -179,8 +180,11 @@ public class AuthService {
                 .build();
         otpRepository.save(otpEntity);
 
+        // 5. Send real OTP email to the user's email address via SMTP
+        emailService.sendPasswordResetOtp(email, otp, OTP_EXPIRY_MINUTES);
+
         return Map.of(
-                "message", "Mã xác thực OTP đã được tạo và lưu trữ an toàn trong CSDL (hiệu lực 5 phút).",
+                "message", "Mã xác thực OTP đã được gửi đến email " + email + ". Vui lòng kiểm tra hộp thư đến hoặc thư rác/spam.",
                 "email", email,
                 "expiresInSeconds", OTP_EXPIRY_MINUTES * 60,
                 "cooldownSeconds", OTP_COOLDOWN_SECONDS,

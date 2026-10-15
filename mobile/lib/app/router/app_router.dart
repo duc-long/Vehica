@@ -87,12 +87,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/home',
     redirect: (context, state) {
       final isAuth = authState.isAuthenticated;
-      final isLoggingIn = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register' ||
-          state.matchedLocation == '/forgot-password';
+      final isGuestAuthRoute = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
+      final isForgotPasswordRoute = state.matchedLocation == '/forgot-password';
 
-      if (!isAuth && !isLoggingIn) return '/login';
-      if (isAuth && isLoggingIn) {
+      // Unauthenticated users can only access login, register, and forgot-password
+      if (!isAuth && !isGuestAuthRoute && !isForgotPasswordRoute) return '/login';
+
+      // Authenticated users should not re-visit login or register, but can change password
+      if (isAuth && isGuestAuthRoute) {
         return authState.isAdmin ? '/admin/dashboard' : '/home';
       }
       return null;

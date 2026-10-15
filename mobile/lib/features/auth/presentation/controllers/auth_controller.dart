@@ -112,11 +112,13 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Dispatches a password reset OTP request (UC-14, BR-23).
   Future<String?> forgotPassword(String email) async {
+    final wasAuth = state.isAuthenticated;
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       final res = await authRepository.forgotPassword(email.trim().toLowerCase());
-      state = state.copyWith(status: AuthStatus.unauthenticated);
-      return res['otp']?.toString();
+      state = state.copyWith(status: wasAuth ? AuthStatus.authenticated : AuthStatus.unauthenticated);
+      final otp = res['otp']?.toString();
+      return (otp != null && otp.isNotEmpty) ? otp : 'sent';
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -132,6 +134,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String otp,
     required String newPassword,
   }) async {
+    final wasAuth = state.isAuthenticated;
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       await authRepository.resetPassword(
@@ -139,7 +142,7 @@ class AuthController extends StateNotifier<AuthState> {
         otp: otp.trim(),
         newPassword: newPassword,
       );
-      state = state.copyWith(status: AuthStatus.unauthenticated);
+      state = state.copyWith(status: wasAuth ? AuthStatus.authenticated : AuthStatus.unauthenticated);
       return true;
     } catch (e) {
       state = state.copyWith(
