@@ -19,6 +19,7 @@ import 'package:vehica_mobile/features/users/presentation/pages/admin_user_manag
 import 'package:vehica_mobile/features/brands/presentation/pages/admin_brand_management_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/admin_vehicle_management_page.dart';
 import 'package:vehica_mobile/features/fleet/presentation/pages/fleet_availability_page.dart';
+import 'package:vehica_mobile/features/dashboard/presentation/pages/admin_dashboard_page.dart';
 import 'package:vehica_mobile/features/fleet/presentation/pages/fleet_availability_page.dart';
 
 // ── Transition builders ────────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (!isAuth && !isGuestAuthRoute && !isForgotPasswordRoute) return '/login';
       if (isAuth && isGuestAuthRoute) {
-        return '/home';
+        return routerNotifier.isAdmin ? '/admin/dashboard' : '/home';
       }
       return null;
     },
@@ -179,6 +180,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         pageBuilder: (context, state) => _slideRightPage(const ProfilePage(), state),
+      ),
+      GoRoute(
+        path: '/admin/dashboard',
+        pageBuilder: (context, state) => _fadePage(const AdminDashboardPage(), state),
       ),
       GoRoute(
         path: '/admin/vehicles',
