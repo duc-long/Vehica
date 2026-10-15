@@ -55,10 +55,10 @@ class MyBookingsPage extends ConsumerWidget {
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1.7,
+                      mainAxisExtent: 226,
                     ),
                     itemCount: 4,
-                    itemBuilder: (_, __) => const BookingCardSkeleton(),
+                    itemBuilder: (_, __) => const BookingCardSkeleton(margin: EdgeInsets.zero),
                   );
                 }
                 return ListView.builder(
@@ -102,7 +102,7 @@ class MyBookingsPage extends ConsumerWidget {
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 1.7,
+                            mainAxisExtent: 226,
                           ),
                           itemCount: list.length,
                           itemBuilder: (context, index) {
@@ -171,39 +171,49 @@ class _BookingCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // ── Card Header (Booking Code + Status) ─────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.receipt_long_rounded,
+                            size: 15,
+                            color: AppColors.primaryLight,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.receipt_long_rounded,
-                          size: 15,
-                          color: AppColors.primaryLight,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            booking.bookingCode,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13.5,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                              letterSpacing: 0.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        booking.bookingCode,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   VehicaStatusChip(status: booking.status),
                 ],
               ),
@@ -213,13 +223,13 @@ class _BookingCard extends StatelessWidget {
 
             // ── Card Body (Image + Vehicle Info) ────────────────────────────
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
                   // Vehicle Thumbnail Image
                   Container(
-                    width: 84,
-                    height: 84,
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
                       color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
                       borderRadius: BorderRadius.circular(14),
@@ -235,17 +245,18 @@ class _BookingCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
 
                   // Vehicle Name & Model & Dates
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           booking.vehicleName,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14.5,
                             fontWeight: FontWeight.w800,
                             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                           ),
@@ -256,17 +267,19 @@ class _BookingCard extends StatelessWidget {
                         Text(
                           '${booking.vehicleBrand} · ${booking.vehicleModel}',
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
                             Icon(
                               Icons.calendar_today_rounded,
-                              size: 13,
+                              size: 12,
                               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
                             ),
                             const SizedBox(width: 5),
@@ -274,7 +287,7 @@ class _BookingCard extends StatelessWidget {
                               child: Text(
                                 '${VehicaFormatters.formatDate(booking.startDate)} → ${VehicaFormatters.formatDate(booking.endDate)}',
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                                 ),
@@ -293,48 +306,57 @@ class _BookingCard extends StatelessWidget {
 
             // ── Card Footer (Duration, Total Amount, CTA) ───────────────────
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 9, 16, 10),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceVariantDark.withValues(alpha: 0.6) : AppColors.backgroundLight,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Thời gian thuê: ${booking.rentalDays} ngày',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Thời gian thuê: ${booking.rentalDays} ngày',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        VehicaFormatters.formatCurrency(booking.totalAmount),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.primaryLight,
+                        const SizedBox(height: 1),
+                        Text(
+                          VehicaFormatters.formatCurrency(booking.totalAmount),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primaryLight,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Chi tiết',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 3),
                       Icon(
                         Icons.chevron_right_rounded,
-                        size: 18,
+                        size: 17,
                         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
                       ),
                     ],

@@ -238,19 +238,36 @@ class BookingSuccessStep extends StatelessWidget {
             },
           ),
           const SizedBox(height: 10),
-          OutlinedButton(
+          OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 46),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
             ),
+            onPressed: () => context.go('/bookings'),
+            icon: Icon(
+              Icons.format_list_bulleted_rounded,
+              size: 16,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+            label: Text(
+              'Danh sách đơn đặt xe',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
             onPressed: () => context.go('/home'),
             child: Text(
               'Về trang chủ',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
               ),
             ),
           ),

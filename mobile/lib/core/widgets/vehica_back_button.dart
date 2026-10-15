@@ -1,8 +1,5 @@
-// ==============================================================================
-// VEHICA Design System — Custom Back Button
-// ==============================================================================
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
 
 /// Consistent back button — flat, bordered, modern.
@@ -10,8 +7,14 @@ import 'package:vehica_mobile/core/constants/app_colors.dart';
 class VehicaBackButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color? iconColor;
+  final String? fallbackPath;
 
-  const VehicaBackButton({super.key, this.onPressed, this.iconColor});
+  const VehicaBackButton({
+    super.key,
+    this.onPressed,
+    this.iconColor,
+    this.fallbackPath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,18 @@ class VehicaBackButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: onPressed ?? () => Navigator.of(context).maybePop(),
+            onTap: onPressed ??
+                () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else if (context.canPop()) {
+                    context.pop();
+                  } else if (fallbackPath != null) {
+                    context.go(fallbackPath!);
+                  } else {
+                    context.go('/home');
+                  }
+                },
             borderRadius: BorderRadius.circular(12),
             child: Container(
               decoration: BoxDecoration(

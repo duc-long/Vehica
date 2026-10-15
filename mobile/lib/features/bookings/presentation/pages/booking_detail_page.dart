@@ -65,9 +65,19 @@ class _BookingDetailPageState extends ConsumerState<BookingDetailPage> {
     final historyState = ref.watch(bookingHistoryProvider(widget.bookingId));
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        leading: const VehicaBackButton(),
+        leading: VehicaBackButton(
+          fallbackPath: '/bookings',
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/bookings');
+            }
+          },
+        ),
         title: Text(
           'Chi tiết đơn đặt xe',
           style: TextStyle(
@@ -319,6 +329,18 @@ class _BookingDetailPageState extends ConsumerState<BookingDetailPage> {
                       onPressed: _isCancelling ? null : () => _handleCancel(vehicle.name),
                     ),
                   ],
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/bookings'),
+                    icon: const Icon(Icons.receipt_long_rounded, size: 17),
+                    label: const Text('Danh sách đơn đặt xe của tôi'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                      foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    ),
+                  ),
                 ],
               ),
             ),
