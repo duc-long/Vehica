@@ -67,6 +67,7 @@ mobile/.widget_preview/
 **/android/app/release/
 **/android/key.properties
 **/android/.gradle/
+**/android/build/
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat
