@@ -85,5 +85,3 @@ class BrandAdminController {
     return success;
   }
 }
-
-// Support updating partner brand attributes and origin (S13, #35)

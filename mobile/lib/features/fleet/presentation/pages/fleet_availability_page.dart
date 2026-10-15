@@ -88,5 +88,3 @@ class _FleetAvailabilityPageState extends ConsumerState<FleetAvailabilityPage> {
     );
   }
 }
-
-// Fix [#14]: Auto-refresh fleet timeline on status invalidation
