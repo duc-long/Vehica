@@ -193,6 +193,61 @@ public class AuthService {
     }
 
     /**
+     * Checks and verifies the OTP code against database (S14 Check OTP, UC-14, BR-23).
+     *
+     * @param request verify OTP request with email and OTP code
+     */
+    @Transactional
+    public void verifyOtp(VerifyOtpRequest request) {
+        String email = request.getEmail().toLowerCase().trim();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản với email: " + email));
+
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new ForbiddenException("Tài khoản đang bị khóa. Hãy liên hệ quản trị viên.");
+        }
+
+        String inputOtp = request.getOtp().trim();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        Optional<PasswordResetOtp> otpOpt =
+                otpRepository.findTopByEmailAndIsUsedFalseOrderByCreatedAtDesc(email);
+
+        if (otpOpt.isEmpty()) {
+            throw new BadRequestException("Không tìm thấy yêu cầu đặt lại mật khẩu hoặc mã OTP đã hết hạn/đã sử dụng. Vui lòng xin mã mới.");
+        }
+
+        PasswordResetOtp otpEntity = otpOpt.get();
+
+        // 1. Check expiration from database
+        if (now.isAfter(otpEntity.getExpiresAt())) {
+            otpEntity.setUsed(true);
+            otpEntity.setUsedAt(now);
+            otpRepository.save(otpEntity);
+            throw new BadRequestException("Mã xác thực OTP đã hết hạn (sau 5 phút). Vui lòng yêu cầu mã mới.");
+        }
+
+        // 2. Anti-Brute-force: Check the number of incorrect attempts from database
+        if (!otpEntity.getOtpCode().equals(inputOtp)) {
+            int attempts = otpEntity.getFailedAttempts() + 1;
+            otpEntity.setFailedAttempts(attempts);
+            if (attempts >= MAX_FAILED_ATTEMPTS) {
+                otpEntity.setUsed(true);
+                otpEntity.setUsedAt(now);
+                otpRepository.save(otpEntity);
+                throw new BadRequestException(
+                        "Bạn đã nhập sai mã OTP quá " + MAX_FAILED_ATTEMPTS + " lần. Mã xác thực đã bị hủy vì lý do bảo mật. Vui lòng xin mã mới."
+                );
+            }
+            otpRepository.save(otpEntity);
+            int remaining = MAX_FAILED_ATTEMPTS - attempts;
+            throw new BadRequestException(
+                    "Mã OTP không chính xác. Bạn còn " + remaining + " lần thử lại."
+            );
+        }
+    }
+
+    /**
      * Verifies the OTP code against brute-force limit (5 attempts) and updates password hash (UC-14, BR-02, BR-23).
      *
      * @param request reset password request with email, OTP code, and new password

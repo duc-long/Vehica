@@ -128,6 +128,29 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  /// Verifies the OTP code against the database (UC-14, BR-23).
+  Future<bool> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final wasAuth = state.isAuthenticated;
+    state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
+    try {
+      await authRepository.verifyOtp(
+        email: email.trim().toLowerCase(),
+        otp: otp.trim(),
+      );
+      state = state.copyWith(status: wasAuth ? AuthStatus.authenticated : AuthStatus.unauthenticated);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString().replaceAll('Exception: ', '').replaceAll('ServerException: ', ''),
+      );
+      return false;
+    }
+  }
+
   /// Resets user password using the verified OTP code (UC-14, BR-02).
   Future<bool> resetPassword({
     required String email,

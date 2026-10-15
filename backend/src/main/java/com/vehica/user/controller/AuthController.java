@@ -66,6 +66,16 @@ public class AuthController {
     }
 
     /**
+     * Verifies OTP code against database (S14 Verify OTP, UC-14, BR-23).
+     */
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify OTP code before resetting password")
+    public ResponseEntity<ApiResponse<Void>> verifyOtp(@Valid @RequestBody com.vehica.user.dto.VerifyOtpRequest request) {
+        authService.verifyOtp(request);
+        return ResponseEntity.ok(ApiResponse.success("Mã OTP hợp lệ. Vui lòng nhập mật khẩu mới.", null));
+    }
+
+    /**
      * Verifies OTP code and sets new account password (S14 Reset Password, UC-14, BR-02).
      */
     @PostMapping("/reset-password")

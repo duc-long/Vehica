@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/services/vehica_feedback.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:vehica_mobile/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:vehica_mobile/features/auth/presentation/pages/register_page.dart';
@@ -79,14 +80,37 @@ CustomTransitionPage<T> _fadePage<T>(Widget child, GoRouterState state) {
     },
   );
 }
+class AppRouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+  AppRouterNotifier(this._ref) {
+    _ref.listen<AuthState>(
+      authControllerProvider,
+      (previous, next) {
+        if (previous?.isAuthenticated != next.isAuthenticated ||
+            previous?.isAdmin != next.isAdmin) {
+          notifyListeners();
+        }
+      },
+    );
+  }
+
+  bool get isAuthenticated => _ref.read(authControllerProvider).isAuthenticated;
+  bool get isAdmin => _ref.read(authControllerProvider).isAdmin;
+}
+
+final appRouterNotifierProvider = Provider<AppRouterNotifier>((ref) {
+  return AppRouterNotifier(ref);
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  final routerNotifier = ref.watch(appRouterNotifierProvider);
 
   return GoRouter(
+    refreshListenable: routerNotifier,
     navigatorKey: VehicaFeedback.navigatorKey,
     initialLocation: '/home',
     redirect: (context, state) {
-      final isAuth = authState.isAuthenticated;
+      final isAuth = routerNotifier.isAuthenticated;
       final isGuestAuthRoute = state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
       final isForgotPasswordRoute = state.matchedLocation == '/forgot-password';
@@ -96,7 +120,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Authenticated users should not re-visit login or register, but can change password
       if (isAuth && isGuestAuthRoute) {
-        return authState.isAdmin ? '/admin/dashboard' : '/home';
+        return routerNotifier.isAdmin ? '/admin/dashboard' : '/home';
       }
       return null;
     },

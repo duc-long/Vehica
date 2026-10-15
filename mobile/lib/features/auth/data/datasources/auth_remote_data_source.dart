@@ -69,6 +69,13 @@ class AuthRemoteDataSource {
     return response['data'] as Map<String, dynamic>;
   }
 
+  Future<void> verifyOtp({required String email, required String otp}) async {
+    await apiClient.post(
+      ApiEndpoints.verifyOtp,
+      data: {'email': email, 'otp': otp},
+    );
+  }
+
   Future<void> resetPassword({
     required String email,
     required String otp,

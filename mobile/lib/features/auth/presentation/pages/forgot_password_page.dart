@@ -27,12 +27,14 @@ class ForgotPasswordPage extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
-  int _currentStep = 1; // 1: Enter email, 2: Enter OTP & new password
+  // 1: Enter email & request OTP, 2: Check & verify OTP, 3: Set new password
+  int _currentStep = 1;
   int _cooldownSeconds = 0;
   Timer? _countdownTimer;
 
   final _step1FormKey = GlobalKey<FormState>();
   final _step2FormKey = GlobalKey<FormState>();
+  final _step3FormKey = GlobalKey<FormState>();
 
   late final TextEditingController _emailController;
   final _otpController = TextEditingController();
@@ -77,6 +79,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     });
   }
 
+  // ── Step 1 Action: Request OTP ─────────────────────────────────────────────
   Future<void> _handleRequestOtp() async {
     if (!_step1FormKey.currentState!.validate()) return;
 
@@ -93,7 +96,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       _startCountdown(60);
 
       VehicaFeedback.showSuccess(
-        'Mã OTP 6 chữ số đã được gửi tới $email',
+        'Mã OTP 6 chữ số đã được gửi qua email đến $email',
         title: 'Gửi mã thành công',
       );
     } else {
@@ -103,8 +106,38 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     }
   }
 
-  Future<void> _handleResetPassword() async {
+  // ── Step 2 Action: Check & Verify OTP ──────────────────────────────────────
+  Future<void> _handleVerifyOtp() async {
     if (!_step2FormKey.currentState!.validate()) return;
+
+    final email = _emailController.text.trim();
+    final otp = _otpController.text.trim();
+
+    final success = await ref.read(authControllerProvider.notifier).verifyOtp(
+          email: email,
+          otp: otp,
+        );
+    if (!mounted) return;
+
+    final authState = ref.read(authControllerProvider);
+    if (success) {
+      setState(() {
+        _currentStep = 3;
+      });
+      VehicaFeedback.showSuccess(
+        'Mã OTP hợp lệ! Hãy thiết lập mật khẩu mới.',
+        title: 'Xác thực thành công',
+      );
+    } else {
+      final errorMsg = authState.errorMessage ??
+          'Mã xác thực OTP không chính xác hoặc đã hết hiệu lực. Vui lòng thử lại.';
+      VehicaFeedback.showError(errorMsg, title: 'Lỗi xác thực OTP');
+    }
+  }
+
+  // ── Step 3 Action: Reset & Set New Password ─────────────────────────────────
+  Future<void> _handleResetPassword() async {
+    if (!_step3FormKey.currentState!.validate()) return;
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
       VehicaFeedback.showError('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.');
@@ -150,6 +183,25 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     final theme = Theme.of(context);
     final isLoggedIn = authState.isAuthenticated;
 
+    String appBarTitle;
+    if (isLoggedIn) {
+      if (_currentStep == 1) {
+        appBarTitle = 'Đổi mật khẩu';
+      } else if (_currentStep == 2) {
+        appBarTitle = 'Xác thực OTP';
+      } else {
+        appBarTitle = 'Mật khẩu mới';
+      }
+    } else {
+      if (_currentStep == 1) {
+        appBarTitle = 'Quên mật khẩu';
+      } else if (_currentStep == 2) {
+        appBarTitle = 'Xác thực OTP';
+      } else {
+        appBarTitle = 'Đặt lại mật khẩu';
+      }
+    }
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
@@ -162,7 +214,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             size: 20,
           ),
           onPressed: () {
-            if (_currentStep == 2) {
+            if (_currentStep == 3) {
+              setState(() => _currentStep = 2);
+            } else if (_currentStep == 2) {
               setState(() => _currentStep = 1);
             } else {
               context.pop();
@@ -170,9 +224,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
           },
         ),
         title: Text(
-          isLoggedIn
-              ? (_currentStep == 1 ? 'Đổi mật khẩu' : 'Xác thực & Mật khẩu mới')
-              : (_currentStep == 1 ? 'Quên mật khẩu' : 'Đặt lại mật khẩu'),
+          appBarTitle,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -191,7 +243,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                 children: [
                   const SizedBox(height: 12),
 
-                  // Header Icon & Step indicator
+                  // Header Icon & Step indicator (3 steps)
                   _HeaderSection(currentStep: _currentStep),
                   const SizedBox(height: 28),
 
@@ -212,9 +264,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                       ],
                     ),
                     padding: const EdgeInsets.all(24),
-                    child: _currentStep == 1
-                        ? _buildStep1Form(authState, theme, isDark, isLoggedIn)
-                        : _buildStep2Form(authState, theme, isDark),
+                    child: _buildCurrentStepForm(authState, theme, isDark, isLoggedIn),
                   ),
 
                   const SizedBox(height: 24),
@@ -252,6 +302,18 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildCurrentStepForm(AuthState authState, ThemeData theme, bool isDark, bool isLoggedIn) {
+    switch (_currentStep) {
+      case 1:
+        return _buildStep1Form(authState, theme, isDark, isLoggedIn);
+      case 2:
+        return _buildStep2Form(authState, theme, isDark, isLoggedIn);
+      case 3:
+      default:
+        return _buildStep3Form(authState, theme, isDark, isLoggedIn);
+    }
   }
 
   // ── Step 1: Enter Email ───────────────────────────────────────────────────────
@@ -331,16 +393,15 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     );
   }
 
-  // ── Step 2: Enter OTP & Set new password ─────────────────────────────────────
-  Widget _buildStep2Form(AuthState authState, ThemeData theme, bool isDark) {
-    final isLoggedIn = authState.isAuthenticated;
+  // ── Step 2: Check & Verify OTP Code ──────────────────────────────────────────
+  Widget _buildStep2Form(AuthState authState, ThemeData theme, bool isDark, bool isLoggedIn) {
     return Form(
       key: _step2FormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            isLoggedIn ? 'Xác thực OTP & Mật khẩu mới' : 'Nhập mã OTP & Mật khẩu mới',
+            'Nhập mã xác thực OTP',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: isDark ? Colors.white : AppColors.textPrimary,
@@ -430,8 +491,9 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             hint: 'Nhập mã 6 chữ số',
             controller: _otpController,
             keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
+            textInputAction: TextInputAction.done,
             prefixIcon: Icons.security_rounded,
+            onFieldSubmitted: (_) => _handleVerifyOtp(),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Vui lòng nhập mã OTP';
@@ -442,44 +504,13 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
               return null;
             },
           ),
-          const SizedBox(height: 14),
-
-          VehicaTextField(
-            label: 'Mật khẩu mới *',
-            hint: 'Tối thiểu 8 ký tự',
-            controller: _newPasswordController,
-            isPassword: true,
-            textInputAction: TextInputAction.next,
-            prefixIcon: Icons.lock_reset_rounded,
-            validator: VehicaValidators.validatePassword,
-          ),
-          const SizedBox(height: 14),
-
-          VehicaTextField(
-            label: 'Xác nhận mật khẩu mới *',
-            hint: 'Nhập lại mật khẩu mới',
-            controller: _confirmPasswordController,
-            isPassword: true,
-            textInputAction: TextInputAction.done,
-            prefixIcon: Icons.lock_outline_rounded,
-            onFieldSubmitted: (_) => _handleResetPassword(),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng xác nhận mật khẩu';
-              }
-              if (value != _newPasswordController.text) {
-                return 'Mật khẩu xác nhận không khớp';
-              }
-              return null;
-            },
-          ),
           const SizedBox(height: 24),
 
           VehicaButton(
-            text: isLoggedIn ? 'Cập nhật mật khẩu mới' : 'Đặt lại mật khẩu',
+            text: 'Xác thực mã OTP',
             isLoading: authState.isLoading,
-            icon: Icons.check_circle_outline_rounded,
-            onPressed: _handleResetPassword,
+            icon: Icons.verified_user_rounded,
+            onPressed: _handleVerifyOtp,
           ),
           const SizedBox(height: 14),
 
@@ -528,6 +559,88 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       ),
     );
   }
+
+  // ── Step 3: Set New Password ────────────────────────────────────────────────
+  Widget _buildStep3Form(AuthState authState, ThemeData theme, bool isDark, bool isLoggedIn) {
+    return Form(
+      key: _step3FormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            isLoggedIn ? 'Thiết lập mật khẩu mới' : 'Đặt lại mật khẩu',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Nhập mật khẩu mới an toàn cho tài khoản ${_emailController.text.trim()}',
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Error banner
+          if (authState.status == AuthStatus.error && authState.errorMessage != null) ...[
+            _ErrorBanner(message: authState.errorMessage!),
+            const SizedBox(height: 16),
+          ],
+
+          VehicaTextField(
+            label: 'Mật khẩu mới *',
+            hint: 'Tối thiểu 8 ký tự',
+            controller: _newPasswordController,
+            isPassword: true,
+            textInputAction: TextInputAction.next,
+            prefixIcon: Icons.lock_reset_rounded,
+            validator: VehicaValidators.validatePassword,
+          ),
+          const SizedBox(height: 14),
+
+          VehicaTextField(
+            label: 'Xác nhận mật khẩu mới *',
+            hint: 'Nhập lại mật khẩu mới',
+            controller: _confirmPasswordController,
+            isPassword: true,
+            textInputAction: TextInputAction.done,
+            prefixIcon: Icons.lock_outline_rounded,
+            onFieldSubmitted: (_) => _handleResetPassword(),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng xác nhận mật khẩu';
+              }
+              if (value != _newPasswordController.text) {
+                return 'Mật khẩu xác nhận không khớp';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+
+          VehicaButton(
+            text: isLoggedIn ? 'Cập nhật mật khẩu mới' : 'Đặt lại mật khẩu',
+            isLoading: authState.isLoading,
+            icon: Icons.check_circle_outline_rounded,
+            onPressed: _handleResetPassword,
+          ),
+          const SizedBox(height: 14),
+
+          Center(
+            child: TextButton.icon(
+              onPressed: () => setState(() => _currentStep = 2),
+              icon: const Icon(Icons.arrow_back_rounded, size: 16),
+              label: const Text('Quay lại bước nhập OTP', style: TextStyle(fontSize: 13)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _HeaderSection extends StatelessWidget {
@@ -537,6 +650,15 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    IconData icon;
+    if (currentStep == 1) {
+      icon = Icons.lock_reset_rounded;
+    } else if (currentStep == 2) {
+      icon = Icons.pin_outlined;
+    } else {
+      icon = Icons.shield_outlined;
+    }
+
     return Column(
       children: [
         Container(
@@ -548,25 +670,32 @@ class _HeaderSection extends StatelessWidget {
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.25), width: 1.5),
           ),
           child: Icon(
-            currentStep == 1 ? Icons.lock_reset_rounded : Icons.shield_outlined,
+            icon,
             size: 38,
             color: AppColors.primaryLight,
           ),
         ),
         const SizedBox(height: 16),
 
-        // Step indicator pills
+        // Step indicator pills (3 steps)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _StepPill(step: 1, label: 'Email', isActive: currentStep >= 1, isCurrent: currentStep == 1),
             Container(
-              width: 32,
+              width: 20,
               height: 2,
               color: currentStep >= 2 ? AppColors.primary : AppColors.borderLight,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
             ),
-            _StepPill(step: 2, label: 'Xác thực & Mật khẩu', isActive: currentStep >= 2, isCurrent: currentStep == 2),
+            _StepPill(step: 2, label: 'Mã OTP', isActive: currentStep >= 2, isCurrent: currentStep == 2),
+            Container(
+              width: 20,
+              height: 2,
+              color: currentStep >= 3 ? AppColors.primary : AppColors.borderLight,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            _StepPill(step: 3, label: 'Mật khẩu', isActive: currentStep >= 3, isCurrent: currentStep == 3),
           ],
         ),
       ],
@@ -593,22 +722,22 @@ class _StepPill extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
-          radius: 12,
+          radius: 11,
           backgroundColor: isActive ? AppColors.primary : AppColors.surfaceVariantLight,
           child: Text(
             '$step',
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10.5,
               fontWeight: FontWeight.w700,
               color: isActive ? Colors.white : AppColors.textSecondary,
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12.5,
+            fontSize: 12,
             fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
             color: isActive ? AppColors.primaryLight : AppColors.textSecondary,
           ),
