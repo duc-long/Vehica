@@ -326,5 +326,3 @@ final adminVehicleControllerProvider = Provider<AdminVehicleController>((ref) {
   final repo = ref.watch(vehicleRepositoryProvider);
   return AdminVehicleController(repository: repo, ref: ref);
 });
-
-// Fix [#25]: Reactive reload debounce & autoDispose lifecycle

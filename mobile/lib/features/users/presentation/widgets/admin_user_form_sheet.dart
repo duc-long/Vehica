@@ -255,5 +255,3 @@ class AdminUserFormSheet {
     );
   }
 }
-
-// Support updating existing user profile fields (UC-10, S09)
