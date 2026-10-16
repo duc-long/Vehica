@@ -49,9 +49,11 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
   void initState() {
     super.initState();
     _vehicle = widget.extraData['vehicle'] as VehicleEntity;
-    _startDate = widget.extraData['startDate'] as DateTime? ??
+    _startDate =
+        widget.extraData['startDate'] as DateTime? ??
         DateTime.now().add(const Duration(days: 1));
-    _endDate = widget.extraData['endDate'] as DateTime? ??
+    _endDate =
+        widget.extraData['endDate'] as DateTime? ??
         DateTime.now().add(const Duration(days: 4));
     _startDateController = TextEditingController(
       text: DateFormat('dd/MM/yyyy').format(_startDate),
@@ -69,15 +71,19 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     super.dispose();
   }
 
+  // ── Computed Properties
   int get _rentalDays {
     final diff = _endDate.difference(_startDate).inDays;
     return diff > 0 ? diff : 1;
   }
 
+  // Cost Calculation
   double get _vehicleCost => _vehicle.pricePerDay * _rentalDays;
 
+  // Total Amount Calculation
   double get _totalAmount => _vehicleCost;
 
+  // Date Parsing & Validation
   DateTime? _tryParseDate(String input) {
     final clean = input.trim();
     final parts = clean.split(RegExp(r'[/.-]'));
@@ -87,7 +93,12 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
       var year = int.tryParse(parts[2]);
       if (day != null && month != null && year != null) {
         if (year < 100) year += 2000;
-        if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2024 && year <= 2035) {
+        if (month >= 1 &&
+            month <= 12 &&
+            day >= 1 &&
+            day <= 31 &&
+            year >= 2024 &&
+            year <= 2035) {
           try {
             return DateTime(year, month, day);
           } catch (_) {}
@@ -97,6 +108,7 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     return null;
   }
 
+  // Validation & Event Handlers start date
   void _onStartDateChanged(String val) {
     final parsed = _tryParseDate(val);
     if (parsed != null) {
@@ -110,6 +122,7 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     }
   }
 
+  // Validation & Event Handlers end date
   void _onEndDateChanged(String val) {
     final parsed = _tryParseDate(val);
     if (parsed != null) {
@@ -119,6 +132,7 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     }
   }
 
+  // Date Picker Handlers
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -131,10 +145,8 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
       helpText: 'CHỌN NGÀY BẮT ĐẦU',
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: AppColors.primary,
-                onPrimary: Colors.white,
-              ),
+          colorScheme: Theme.of(context).colorScheme
+              .copyWith(primary: AppColors.primary, onPrimary: Colors.white),
         ),
         child: child!,
       ),
@@ -151,6 +163,7 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     }
   }
 
+  // Date Picker Handlers
   Future<void> _pickEndDate() async {
     final minDate = _startDate.add(const Duration(days: 1));
     final initial = _endDate.isAfter(_startDate) ? _endDate : minDate;
@@ -164,10 +177,8 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
       helpText: 'CHỌN NGÀY KẾT THÚC',
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: AppColors.primary,
-                onPrimary: Colors.white,
-              ),
+          colorScheme: Theme.of(context).colorScheme
+              .copyWith(primary: AppColors.primary, onPrimary: Colors.white),
         ),
         child: child!,
       ),
@@ -180,6 +191,7 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
     }
   }
 
+  // Handle Booking Submission
   Future<void> _handleSubmit() async {
     setState(() => _isSubmitting = true);
 
@@ -239,12 +251,16 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         appBar: AppBar(
           title: Text(
             _currentStep == 0
                 ? 'Chọn ngày thuê'
-                : (_currentStep == 1 ? 'Xem lại & Xác nhận' : 'Đặt xe thành công'),
+                : (_currentStep == 1
+                      ? 'Xem lại & Xác nhận'
+                      : 'Đặt xe thành công'),
             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
           ),
           leading: _currentStep == 1
@@ -253,28 +269,25 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
                   onPressed: () => setState(() => _currentStep = 0),
                 )
               : (_currentStep == 2
-                  ? IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () => context.go('/home'),
-                    )
-                  : VehicaBackButton(
-                      onPressed: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('/home');
-                        }
-                      },
-                    )),
+                    ? IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => context.go('/home'),
+                      )
+                    : VehicaBackButton(
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/home');
+                          }
+                        },
+                      )),
         ),
         body: SafeArea(
           child: Column(
             children: [
               // ── Step Progress Indicator ──────────────────────────────────
-              BookingStepProgressBar(
-                currentStep: _currentStep,
-                isDark: isDark,
-              ),
+              BookingStepProgressBar(currentStep: _currentStep, isDark: isDark),
 
               // ── Body Step Content ─────────────────────────────────────────
               Expanded(
@@ -291,26 +304,26 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
                         isDark: isDark,
                       )
                     : (_currentStep == 1
-                        ? BookingReviewStep(
-                            vehicle: _vehicle,
-                            startDate: _startDate,
-                            endDate: _endDate,
-                            rentalDays: _rentalDays,
-                            vehicleCost: _vehicleCost,
-                            totalAmount: _totalAmount,
-                            noteController: _noteController,
-                            isDark: isDark,
-                          )
-                        : BookingSuccessStep(
-                            createdBookingId: _createdBookingId,
-                            createdBookingCode: _createdBookingCode,
-                            vehicle: _vehicle,
-                            startDate: _startDate,
-                            endDate: _endDate,
-                            rentalDays: _rentalDays,
-                            totalAmount: _totalAmount,
-                            isDark: isDark,
-                          )),
+                          ? BookingReviewStep(
+                              vehicle: _vehicle,
+                              startDate: _startDate,
+                              endDate: _endDate,
+                              rentalDays: _rentalDays,
+                              vehicleCost: _vehicleCost,
+                              totalAmount: _totalAmount,
+                              noteController: _noteController,
+                              isDark: isDark,
+                            )
+                          : BookingSuccessStep(
+                              createdBookingId: _createdBookingId,
+                              createdBookingCode: _createdBookingCode,
+                              vehicle: _vehicle,
+                              startDate: _startDate,
+                              endDate: _endDate,
+                              rentalDays: _rentalDays,
+                              totalAmount: _totalAmount,
+                              isDark: isDark,
+                            )),
               ),
 
               // ── Bottom Navigation / CTA Bar ───────────────────────────────
@@ -323,7 +336,9 @@ class _CreateBookingPageState extends ConsumerState<CreateBookingPage> {
                     if (!_endDate.isAfter(_startDate)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 ngày'),
+                          content: Text(
+                            'Ngày kết thúc phải sau ngày bắt đầu ít nhất 1 ngày',
+                          ),
                           backgroundColor: AppColors.error,
                         ),
                       );
