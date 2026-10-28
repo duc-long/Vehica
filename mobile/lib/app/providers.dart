@@ -19,6 +19,9 @@ import 'package:vehica_mobile/features/users/domain/repositories/user_admin_repo
 import 'package:vehica_mobile/features/vehicles/data/datasources/vehicle_remote_data_source.dart';
 import 'package:vehica_mobile/features/vehicles/data/repositories/vehicle_repository_impl.dart';
 import 'package:vehica_mobile/features/vehicles/domain/repositories/vehicle_repository.dart';
+import 'package:vehica_mobile/features/favorites/data/datasources/favorite_remote_data_source.dart';
+import 'package:vehica_mobile/features/favorites/data/repositories/favorite_repository_impl.dart';
+import 'package:vehica_mobile/features/favorites/domain/repositories/favorite_repository.dart';
 
 // Storage Provider
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
@@ -96,4 +99,15 @@ final dashboardRemoteDataSourceProvider = Provider<DashboardRemoteDataSource>((r
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   final remote = ref.watch(dashboardRemoteDataSourceProvider);
   return DashboardRepositoryImpl(remoteDataSource: remote);
+});
+
+// Favorite Providers
+final favoriteRemoteDataSourceProvider = Provider<FavoriteRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return FavoriteRemoteDataSource(apiClient: apiClient);
+});
+
+final favoriteRepositoryProvider = Provider<FavoriteRepository>((ref) {
+  final remote = ref.watch(favoriteRemoteDataSourceProvider);
+  return FavoriteRepositoryImpl(remoteDataSource: remote);
 });
