@@ -6,7 +6,7 @@ import 'package:vehica_mobile/core/widgets/vehica_back_button.dart';
 import 'package:vehica_mobile/core/widgets/vehica_button.dart';
 import 'package:vehica_mobile/core/widgets/vehica_skeleton.dart';
 import 'package:vehica_mobile/features/favorites/presentation/controllers/favorite_controller.dart';
-import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_card.dart';
+import 'package:vehica_mobile/features/favorites/presentation/widgets/favorite_vehicle_card.dart';
 
 class FavoritesPage extends ConsumerStatefulWidget {
   const FavoritesPage({super.key});
@@ -199,10 +199,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
       itemCount: state.favoriteVehicles.length,
       itemBuilder: (context, index) {
         final vehicle = state.favoriteVehicles[index];
-        return VehicleCard(
+        return FavoriteVehicleCard(
           key: ValueKey(vehicle.id),
           vehicle: vehicle,
-          onTap: () => context.push('/vehicles/${vehicle.id}'),
         );
       },
     );
