@@ -23,6 +23,11 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
+  Future<ReviewEligibilityEntity> getReviewEligibility(String vehicleId) {
+    return remoteDataSource.getReviewEligibility(vehicleId);
+  }
+
+  @override
   Future<ReviewEntity> submitReview(String vehicleId, {required int rating, required String reviewText}) {
     return remoteDataSource.submitReview(vehicleId, rating: rating, reviewText: reviewText);
   }

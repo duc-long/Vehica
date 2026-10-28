@@ -30,6 +30,12 @@ class ReviewRemoteDataSource {
     return ReviewModel.fromJson(data as Map<String, dynamic>);
   }
 
+  Future<ReviewEligibilityModel> getReviewEligibility(String vehicleId) async {
+    final response = await apiClient.get(ApiEndpoints.vehicleReviewEligibility(vehicleId));
+    final data = response['data'] as Map<String, dynamic>;
+    return ReviewEligibilityModel.fromJson(data);
+  }
+
   Future<ReviewModel> submitReview(
     String vehicleId, {
     required int rating,

@@ -74,6 +74,7 @@ public class BookingDtos {
         private BigDecimal pricePerDay;
         private BigDecimal totalAmount;
         private String vehicleName;
+        private UUID vehicleId;
         private String vehicleBrand;
         private String vehicleModel;
         private String vehicleImageUrl;

@@ -19,6 +19,8 @@ import 'package:vehica_mobile/features/bookings/presentation/controllers/booking
 import 'package:vehica_mobile/features/bookings/presentation/widgets/booking_cancel_sheet.dart';
 import 'package:vehica_mobile/features/bookings/presentation/widgets/booking_detail_card.dart';
 import 'package:vehica_mobile/features/bookings/presentation/widgets/booking_timeline_card.dart';
+import 'package:vehica_mobile/features/reviews/presentation/controllers/review_controller.dart';
+import 'package:vehica_mobile/features/reviews/presentation/widgets/write_review_bottom_sheet.dart';
 
 class BookingDetailPage extends ConsumerStatefulWidget {
   final String bookingId;
@@ -315,6 +317,103 @@ class _BookingDetailPageState extends ConsumerState<BookingDetailPage> {
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
+
+                  // ── Completed Rental: Rate & Review Vehicle ──────────────
+                  if (booking.status.toUpperCase() == 'COMPLETED') ...[
+                    const SizedBox(height: 20),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final reviewState = ref.watch(reviewControllerProvider(vehicle.id));
+                        final hasReviewed = reviewState.myReview != null;
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: hasReviewed
+                                  ? AppColors.primaryLight.withValues(alpha: 0.3)
+                                  : AppColors.accentGold.withValues(alpha: 0.4),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (hasReviewed ? AppColors.primaryLight : AppColors.accentGold).withValues(alpha: 0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: (hasReviewed ? AppColors.primaryLight : AppColors.accentGold).withValues(alpha: 0.16),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      hasReviewed ? Icons.verified_rounded : Icons.star_rounded,
+                                      color: hasReviewed ? AppColors.primaryLight : AppColors.accentGold,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          hasReviewed ? 'Đánh giá của bạn đã gửi' : 'Đánh giá chuyến đi này',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          hasReviewed
+                                              ? 'Bạn đã đánh giá ${reviewState.myReview!.rating}★ cho chiếc ${vehicle.name}. Bạn có thể chỉnh sửa bất cứ lúc nào.'
+                                              : 'Chuyến đi đã hoàn tất! Hãy chia sẻ cảm nhận và đánh giá về chiếc ${vehicle.name}.',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              VehicaButton(
+                                type: hasReviewed ? VehicaButtonType.secondary : VehicaButtonType.primary,
+                                text: hasReviewed ? 'Chỉnh sửa đánh giá của bạn' : 'Đánh giá & Nhận xét xe này',
+                                icon: hasReviewed ? Icons.edit_note_rounded : Icons.rate_review_rounded,
+                                height: 46,
+                                borderRadius: 12,
+                                onPressed: () async {
+                                  final submitted = await WriteReviewBottomSheet.show(
+                                    context,
+                                    vehicle: vehicle,
+                                    initialReview: reviewState.myReview,
+                                  );
+                                  if (submitted == true) {
+                                    ref.invalidate(reviewControllerProvider(vehicle.id));
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
 
                   // ── Cancel Action Button ─────────────────────────────────
                   if (booking.isCancellable) ...[

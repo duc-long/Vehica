@@ -4,6 +4,7 @@ abstract class ReviewRepository {
   Future<List<ReviewEntity>> getVehicleReviews(String vehicleId, {int page = 0, int size = 10});
   Future<ReviewSummaryEntity> getVehicleReviewSummary(String vehicleId);
   Future<ReviewEntity?> getMyReview(String vehicleId);
+  Future<ReviewEligibilityEntity> getReviewEligibility(String vehicleId);
   Future<ReviewEntity> submitReview(String vehicleId, {required int rating, required String reviewText});
   Future<void> deleteReview(String reviewId);
 }

@@ -1,5 +1,8 @@
 package com.vehica.review.service;
 
+import com.vehica.booking.repository.BookingRepository;
+import com.vehica.common.enums.BookingStatus;
+import com.vehica.common.exception.BadRequestException;
 import com.vehica.common.exception.ForbiddenException;
 import com.vehica.common.exception.ResourceNotFoundException;
 import com.vehica.common.response.PageResponse;
@@ -29,6 +32,7 @@ public class ReviewService {
     private final VehicleReviewRepository vehicleReviewRepository;
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional
     public ReviewDtos.ReviewDto createOrUpdateReview(UUID userId, UUID vehicleId, ReviewDtos.CreateReviewRequest request) {
@@ -37,6 +41,12 @@ public class ReviewService {
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe với ID: " + vehicleId));
+
+        // Rule: Customer must have completed a booking for this vehicle to review
+        boolean hasCompleted = bookingRepository.existsByUserIdAndVehicleIdAndStatus(userId, vehicleId, BookingStatus.COMPLETED);
+        if (!hasCompleted) {
+            throw new BadRequestException("Bạn chỉ có thể đánh giá và nhận xét xe sau khi đã hoàn thành chuyến đi thuê xe này.");
+        }
 
         Optional<VehicleReview> existingReview = vehicleReviewRepository.findByUserIdAndVehicleId(userId, vehicleId);
 
@@ -111,6 +121,31 @@ public class ReviewService {
     public Optional<ReviewDtos.ReviewDto> getUserReviewForVehicle(UUID userId, UUID vehicleId) {
         return vehicleReviewRepository.findByUserIdAndVehicleId(userId, vehicleId)
                 .map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewDtos.ReviewEligibilityDto checkReviewEligibility(UUID userId, UUID vehicleId) {
+        if (!vehicleRepository.existsById(vehicleId)) {
+            throw new ResourceNotFoundException("Không tìm thấy xe với ID: " + vehicleId);
+        }
+
+        boolean hasCompleted = bookingRepository.existsByUserIdAndVehicleIdAndStatus(userId, vehicleId, BookingStatus.COMPLETED);
+        boolean alreadyReviewed = vehicleReviewRepository.findByUserIdAndVehicleId(userId, vehicleId).isPresent();
+
+        String message;
+        if (!hasCompleted) {
+            message = "Bạn cần hoàn thành ít nhất một chuyến đi thuê xe này để có thể đánh giá và nhận xét.";
+        } else if (alreadyReviewed) {
+            message = "Bạn đã đánh giá xe này. Bạn có thể cập nhật đánh giá bất cứ lúc nào.";
+        } else {
+            message = "Bạn đủ điều kiện để đánh giá xe này.";
+        }
+
+        return ReviewDtos.ReviewEligibilityDto.builder()
+                .eligible(hasCompleted)
+                .alreadyReviewed(alreadyReviewed)
+                .message(message)
+                .build();
     }
 
     @Transactional

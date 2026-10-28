@@ -29,6 +29,7 @@ class BookingSummaryEntity {
   final double pricePerDay;
   final double totalAmount;
   final String vehicleName;
+  final String? vehicleId;
   final String vehicleBrand;
   final String vehicleModel;
   final String? vehicleImageUrl;
@@ -45,6 +46,7 @@ class BookingSummaryEntity {
     required this.pricePerDay,
     required this.totalAmount,
     required this.vehicleName,
+    this.vehicleId,
     required this.vehicleBrand,
     required this.vehicleModel,
     this.vehicleImageUrl,

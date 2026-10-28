@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
+import 'package:vehica_mobile/core/services/vehica_feedback.dart';
 import 'package:vehica_mobile/core/widgets/vehica_image.dart';
 import 'package:vehica_mobile/core/widgets/vehica_skeleton.dart';
+import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vehica_mobile/features/reviews/domain/entities/review_entity.dart';
 import 'package:vehica_mobile/features/reviews/presentation/controllers/review_controller.dart';
 import 'package:vehica_mobile/features/reviews/presentation/widgets/write_review_bottom_sheet.dart';
@@ -90,11 +92,7 @@ class VehicleDetailReviewsSection extends ConsumerWidget {
 
               // Button to open write review
               TextButton.icon(
-                onPressed: () => WriteReviewBottomSheet.show(
-                  context,
-                  vehicle: vehicle,
-                  initialReview: reviewState.myReview,
-                ),
+                onPressed: () => _handleWriteReview(context, ref, reviewState),
                 icon: Icon(
                   reviewState.myReview != null ? Icons.edit_outlined : Icons.rate_review_outlined,
                   size: 16,
@@ -110,6 +108,37 @@ class VehicleDetailReviewsSection extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+
+          // ── Rental Verified Trust Notice ──────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.surfaceVariantDark.withValues(alpha: 0.5)
+                  : AppColors.surfaceVariantLight.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_rounded, size: 14, color: AppColors.primaryLight),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Đánh giá được xác thực từ khách hàng đã thuê xe này',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
 
@@ -289,6 +318,85 @@ class VehicleDetailReviewsSection extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _handleWriteReview(BuildContext context, WidgetRef ref, ReviewState reviewState) {
+    final authState = ref.read(authControllerProvider);
+    if (!authState.isAuthenticated) {
+      VehicaFeedback.showInfo('Vui lòng đăng nhập để viết đánh giá.');
+      return;
+    }
+
+    // Nếu người dùng đã từng review rồi -> cho phép sửa
+    if (reviewState.myReview != null) {
+      WriteReviewBottomSheet.show(
+        context,
+        vehicle: vehicle,
+        initialReview: reviewState.myReview,
+      );
+      return;
+    }
+
+    // Nếu người dùng chưa từng hoàn thành chuyến đi -> hiển thị modal thông báo quy định
+    if (reviewState.eligibility != null && !reviewState.eligibility!.eligible) {
+      showDialog(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.verified_user_outlined,
+              color: AppColors.primaryLight,
+              size: 32,
+            ),
+          ),
+          title: Text(
+            'Quy định đánh giá xe',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+            ),
+          ),
+          content: Text(
+            'Để đảm bảo tính trung thực và khách quan, chỉ những khách hàng đã thuê và hoàn tất chuyến đi với chiếc xe này mới có thể viết đánh giá & nhận xét.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.45,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text(
+                'Đã hiểu',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryLight,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    WriteReviewBottomSheet.show(
+      context,
+      vehicle: vehicle,
+      initialReview: reviewState.myReview,
     );
   }
 }

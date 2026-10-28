@@ -57,4 +57,14 @@ public class ReviewDtos {
         private Long totalReviews;
         private Map<Integer, Long> ratingCounts;
     }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReviewEligibilityDto {
+        private boolean eligible;
+        private boolean alreadyReviewed;
+        private String message;
+    }
 }

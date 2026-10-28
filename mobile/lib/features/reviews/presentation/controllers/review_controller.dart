@@ -8,6 +8,7 @@ class ReviewState {
   final List<ReviewEntity> reviews;
   final ReviewSummaryEntity? summary;
   final ReviewEntity? myReview;
+  final ReviewEligibilityEntity? eligibility;
   final bool isLoading;
   final bool isSubmitting;
   final String? error;
@@ -16,6 +17,7 @@ class ReviewState {
     this.reviews = const [],
     this.summary,
     this.myReview,
+    this.eligibility,
     this.isLoading = false,
     this.isSubmitting = false,
     this.error,
@@ -25,6 +27,7 @@ class ReviewState {
     List<ReviewEntity>? reviews,
     ReviewSummaryEntity? summary,
     ReviewEntity? myReview,
+    ReviewEligibilityEntity? eligibility,
     bool clearMyReview = false,
     bool? isLoading,
     bool? isSubmitting,
@@ -34,6 +37,7 @@ class ReviewState {
       reviews: reviews ?? this.reviews,
       summary: summary ?? this.summary,
       myReview: clearMyReview ? null : (myReview ?? this.myReview),
+      eligibility: eligibility ?? this.eligibility,
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       error: error,
@@ -69,16 +73,22 @@ class ReviewController extends StateNotifier<ReviewState> {
           _repository.getMyReview(vehicleId)
         else
           Future.value(null),
+        if (authState.isAuthenticated)
+          _repository.getReviewEligibility(vehicleId)
+        else
+          Future.value(null),
       ]);
 
       final reviews = futures[0] as List<ReviewEntity>;
       final summary = futures[1] as ReviewSummaryEntity;
       final myReview = futures[2] as ReviewEntity?;
+      final eligibility = futures[3] as ReviewEligibilityEntity?;
 
       state = state.copyWith(
         reviews: reviews,
         summary: summary,
         myReview: myReview,
+        eligibility: eligibility,
         isLoading: false,
       );
     } catch (e) {
@@ -110,6 +120,11 @@ class ReviewController extends StateNotifier<ReviewState> {
       state = state.copyWith(
         reviews: updatedList,
         myReview: created,
+        eligibility: const ReviewEligibilityEntity(
+          eligible: true,
+          alreadyReviewed: true,
+          message: 'Bạn đã gửi đánh giá cho xe này.',
+        ),
         isSubmitting: false,
       );
 
