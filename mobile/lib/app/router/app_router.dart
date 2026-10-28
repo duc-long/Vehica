@@ -19,6 +19,7 @@ import 'package:vehica_mobile/features/profile/presentation/pages/profile_page.d
 import 'package:vehica_mobile/features/users/presentation/pages/admin_user_management_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/admin_vehicle_management_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_catalog_page.dart';
+import 'package:vehica_mobile/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/pages/vehicle_detail_page.dart';
 
 
@@ -210,6 +211,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         pageBuilder: (context, state) =>
             _slideRightPage(const ProfilePage(), state),
+      ),
+      GoRoute(
+        path: '/favorites',
+        pageBuilder: (context, state) =>
+            _slideRightPage(const FavoritesPage(), state),
       ),
 
       // ── Admin ─────────────────────────────────────────────────────────────
