@@ -33,3 +33,15 @@ class ReviewSummaryEntity {
     required this.ratingCounts,
   });
 }
+
+class ReviewEligibilityEntity {
+  final bool eligible;
+  final bool alreadyReviewed;
+  final String? message;
+
+  const ReviewEligibilityEntity({
+    required this.eligible,
+    required this.alreadyReviewed,
+    this.message,
+  });
+}

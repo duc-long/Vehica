@@ -62,6 +62,26 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.success(review));
     }
 
+    @GetMapping("/api/v1/vehicles/{vehicleId}/reviews/eligibility")
+    @Operation(summary = "Check if current authenticated customer is eligible to review vehicle (completed rental check)")
+    public ResponseEntity<ApiResponse<ReviewDtos.ReviewEligibilityDto>> checkEligibility(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable UUID vehicleId) {
+
+        if (userPrincipal == null) {
+            return ResponseEntity.ok(ApiResponse.success(
+                    ReviewDtos.ReviewEligibilityDto.builder()
+                            .eligible(false)
+                            .alreadyReviewed(false)
+                            .message("Vui lòng đăng nhập để đánh giá xe.")
+                            .build()
+            ));
+        }
+
+        ReviewDtos.ReviewEligibilityDto eligibility = reviewService.checkReviewEligibility(userPrincipal.getId(), vehicleId);
+        return ResponseEntity.ok(ApiResponse.success(eligibility));
+    }
+
     @PostMapping("/api/v1/vehicles/{vehicleId}/reviews")
     @Operation(summary = "Submit or update rating and review for a vehicle")
     public ResponseEntity<ApiResponse<ReviewDtos.ReviewDto>> submitReview(

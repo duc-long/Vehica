@@ -36,6 +36,7 @@ class ApiEndpoints {
   static String vehicleReviews(String id) => '/vehicles/$id/reviews';
   static String vehicleReviewSummary(String id) => '/vehicles/$id/reviews/summary';
   static String vehicleMyReview(String id) => '/vehicles/$id/reviews/my-review';
+  static String vehicleReviewEligibility(String id) => '/vehicles/$id/reviews/eligibility';
   static String deleteReview(String reviewId) => '/reviews/$reviewId';
 
   // Admin Users

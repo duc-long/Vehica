@@ -105,6 +105,16 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     long countByUserId(UUID userId);
 
     /**
+     * Checks if a user has at least one booking with a specific status for a vehicle.
+     */
+    @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.user.id = :userId AND b.vehicle.id = :vehicleId AND b.status = :status")
+    boolean existsByUserIdAndVehicleIdAndStatus(
+            @Param("userId") UUID userId,
+            @Param("vehicleId") UUID vehicleId,
+            @Param("status") BookingStatus status
+    );
+
+    /**
      * Aggregates booking counts grouped by status for KPI analytics (S10).
      */
     @Query("SELECT b.status, COUNT(b) FROM Booking b GROUP BY b.status")

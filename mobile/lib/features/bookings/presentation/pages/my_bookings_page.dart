@@ -342,6 +342,31 @@ class _BookingCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  if (booking.status.toUpperCase() == 'COMPLETED') ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentGold.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star_rounded, size: 14, color: AppColors.accentGold),
+                          SizedBox(width: 4),
+                          Text(
+                            'Đánh giá xe',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.accentGold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

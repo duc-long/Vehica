@@ -55,3 +55,19 @@ class ReviewSummaryModel extends ReviewSummaryEntity {
     );
   }
 }
+
+class ReviewEligibilityModel extends ReviewEligibilityEntity {
+  const ReviewEligibilityModel({
+    required super.eligible,
+    required super.alreadyReviewed,
+    super.message,
+  });
+
+  factory ReviewEligibilityModel.fromJson(Map<String, dynamic> json) {
+    return ReviewEligibilityModel(
+      eligible: json['eligible'] == true,
+      alreadyReviewed: json['alreadyReviewed'] == true,
+      message: json['message']?.toString(),
+    );
+  }
+}
