@@ -32,6 +32,12 @@ class ApiEndpoints {
   static String toggleFavorite(String id) => '/favorites/$id/toggle';
   static String checkFavorite(String id) => '/favorites/$id/check';
 
+  // Reviews & Ratings
+  static String vehicleReviews(String id) => '/vehicles/$id/reviews';
+  static String vehicleReviewSummary(String id) => '/vehicles/$id/reviews/summary';
+  static String vehicleMyReview(String id) => '/vehicles/$id/reviews/my-review';
+  static String deleteReview(String reviewId) => '/reviews/$reviewId';
+
   // Admin Users
   static const String adminUsers = '/admin/users';
   static String adminUserDetail(String id) => '/admin/users/$id';

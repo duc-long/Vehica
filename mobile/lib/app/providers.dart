@@ -22,6 +22,9 @@ import 'package:vehica_mobile/features/vehicles/domain/repositories/vehicle_repo
 import 'package:vehica_mobile/features/favorites/data/datasources/favorite_remote_data_source.dart';
 import 'package:vehica_mobile/features/favorites/data/repositories/favorite_repository_impl.dart';
 import 'package:vehica_mobile/features/favorites/domain/repositories/favorite_repository.dart';
+import 'package:vehica_mobile/features/reviews/data/datasources/review_remote_data_source.dart';
+import 'package:vehica_mobile/features/reviews/data/repositories/review_repository_impl.dart';
+import 'package:vehica_mobile/features/reviews/domain/repositories/review_repository.dart';
 
 // Storage Provider
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
@@ -110,4 +113,15 @@ final favoriteRemoteDataSourceProvider = Provider<FavoriteRemoteDataSource>((ref
 final favoriteRepositoryProvider = Provider<FavoriteRepository>((ref) {
   final remote = ref.watch(favoriteRemoteDataSourceProvider);
   return FavoriteRepositoryImpl(remoteDataSource: remote);
+});
+
+// Review Providers
+final reviewRemoteDataSourceProvider = Provider<ReviewRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return ReviewRemoteDataSource(apiClient: apiClient);
+});
+
+final reviewRepositoryProvider = Provider<ReviewRepository>((ref) {
+  final remote = ref.watch(reviewRemoteDataSourceProvider);
+  return ReviewRepositoryImpl(remoteDataSource: remote);
 });
