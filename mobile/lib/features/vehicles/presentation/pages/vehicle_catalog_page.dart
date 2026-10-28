@@ -12,6 +12,7 @@ import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_car
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_catalog_filter_bar.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_catalog_grid_card.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_catalog_search_bar.dart';
+import 'package:vehica_mobile/features/favorites/presentation/controllers/favorite_controller.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_catalog_toolbar.dart';
 
 class VehicleCatalogPage extends ConsumerStatefulWidget {
@@ -160,13 +161,70 @@ class _VehicleCatalogPageState extends ConsumerState<VehicleCatalogPage> {
       appBar: AppBar(
         leading: const VehicaBackButton(),
         title: Text(
-          'Danh mục xe',
+          'Khám phá xe',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Consumer(
+              builder: (context, ref, _) {
+                final favoriteCount = ref.watch(favoriteControllerProvider.select((s) => s.favoriteIds.length));
+                return Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.favorite_rounded, size: 21),
+                        color: const Color(0xFFEF4444),
+                        tooltip: 'Xe yêu thích',
+                        onPressed: () => context.push('/favorites'),
+                      ),
+                    ),
+                    if (favoriteCount > 0)
+                      Positioned(
+                        top: -3,
+                        right: -3,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isDark ? AppColors.backgroundDark : Colors.white,
+                              width: 1.5,
+                            ),
+                          ),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          child: Text(
+                            '$favoriteCount',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
