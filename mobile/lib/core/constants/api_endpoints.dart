@@ -25,6 +25,13 @@ class ApiEndpoints {
   static String bookingHistory(String id) => '/bookings/$id/history';
   static String cancelBooking(String id) => '/bookings/$id/cancel';
 
+  // Favorites
+  static const String favorites = '/favorites';
+  static const String favoriteIds = '/favorites/ids';
+  static String favoriteVehicle(String id) => '/favorites/$id';
+  static String toggleFavorite(String id) => '/favorites/$id/toggle';
+  static String checkFavorite(String id) => '/favorites/$id/check';
+
   // Admin Users
   static const String adminUsers = '/admin/users';
   static String adminUserDetail(String id) => '/admin/users/$id';
