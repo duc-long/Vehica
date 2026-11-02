@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/app/providers.dart';
+import 'package:vehica_mobile/core/services/notification_service.dart';
 import 'package:vehica_mobile/core/services/vehica_feedback.dart';
 import 'package:vehica_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vehica_mobile/features/bookings/domain/repositories/booking_repository.dart';
@@ -96,13 +97,25 @@ class BookingSyncService {
       if (!_knownAdminBookingIds.contains(b.id)) {
         _knownAdminBookingIds.add(b.id);
 
-        // Immediate In-App Push Notification for Admin
+        final title = 'Đơn đặt xe mới!';
+        final message = '${b.customerName} vừa đặt xe ${b.vehicleName} (Mã: ${b.bookingCode})';
+
+        // 1. Save to local notification inbox
+        ref.read(notificationListProvider.notifier).addNotification(
+          title: title,
+          message: message,
+          bookingId: b.id,
+          bookingCode: b.bookingCode,
+          type: 'NEW_BOOKING',
+        );
+
+        // 2. Immediate In-App Push Notification for Admin
         VehicaFeedback.showInAppPush(
-          title: 'Đơn đặt xe mới!',
-          message: '${b.customerName} vừa đặt xe ${b.vehicleName} (Mã: ${b.bookingCode})',
+          title: title,
+          message: message,
           icon: Icons.notifications_active_rounded,
           onTap: () {
-            VehicaFeedback.navigatorKey.currentContext?.push('/admin/bookings');
+            VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
           },
         );
 
@@ -129,10 +142,22 @@ class BookingSyncService {
       if (oldStatus != null && oldStatus.toUpperCase() != b.status.toUpperCase()) {
         _knownUserBookingStatuses[b.id] = b.status;
 
-        // Immediate In-App Push Notification for Customer
+        final title = 'Cập nhật đơn đặt xe';
+        final message = 'Đơn xe ${b.vehicleName} (${b.bookingCode}) đã chuyển sang ${_translateStatus(b.status)}';
+
+        // 1. Save to local notification inbox
+        ref.read(notificationListProvider.notifier).addNotification(
+          title: title,
+          message: message,
+          bookingId: b.id,
+          bookingCode: b.bookingCode,
+          type: 'STATUS_CHANGE',
+        );
+
+        // 2. Immediate In-App Push Notification for Customer
         VehicaFeedback.showInAppPush(
-          title: 'Cập nhật đơn đặt xe',
-          message: 'Đơn xe ${b.vehicleName} (${b.bookingCode}) đã chuyển sang ${_translateStatus(b.status)}',
+          title: title,
+          message: message,
           icon: Icons.check_circle_outline_rounded,
           onTap: () {
             VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
@@ -151,15 +176,16 @@ class BookingSyncService {
   String _translateStatus(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'Chờ xác nhận';
+        return 'Chờ duyệt cọc';
       case 'CONFIRMED':
-        return 'Đã xác nhận';
+        return 'Đã duyệt (Chờ nhận xe)';
+      case 'PICKED_UP':
       case 'ACTIVE':
-        return 'Đang thuê xe';
+        return 'Đang thuê xe (Đã nhận xe)';
       case 'COMPLETED':
-        return 'Đã hoàn thành';
+        return 'Đã hoàn tất trả xe';
       case 'CANCELLED':
-        return 'Đã hủy';
+        return 'Đã hủy đơn';
       default:
         return status;
     }
