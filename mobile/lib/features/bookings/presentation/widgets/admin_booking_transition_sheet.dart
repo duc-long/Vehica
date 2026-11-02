@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
 import 'package:vehica_mobile/core/widgets/vehica_status_chip.dart';
 import 'package:vehica_mobile/features/bookings/domain/entities/booking_entity.dart';
-import 'package:vehica_mobile/features/bookings/presentation/controllers/booking_controllers.dart';
+import 'package:vehica_mobile/features/bookings/presentation/widgets/admin_approve_booking_dialog.dart';
+import 'package:vehica_mobile/features/bookings/presentation/widgets/admin_cancel_booking_dialog.dart';
+import 'package:vehica_mobile/features/bookings/presentation/widgets/admin_pickup_inspection_sheet.dart';
+import 'package:vehica_mobile/features/bookings/presentation/widgets/admin_return_inspection_sheet.dart';
 
 /// Modal bottom sheet allowing admins to transition booking state per BR-16.
 class AdminBookingTransitionSheet extends ConsumerWidget {
@@ -43,11 +46,11 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
     );
   }
 
-  static Map<String, dynamic> getActionDetails(String status) {
+  static Map<String, dynamic> getActionDetails(String status, String currentStatus) {
     switch (status) {
       case 'CONFIRMED':
         return {
-          'title': 'Duyệt xác nhận cọc',
+          'title': 'Duyệt & Xác nhận cọc',
           'subtitle': 'Khách đã cọc, sẵn sàng giữ xe trong lịch',
           'icon': Icons.verified_rounded,
           'color': const Color(0xFF3B82F6),
@@ -56,23 +59,26 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
       case 'PICKED_UP':
         return {
           'title': 'Bàn giao xe cho khách (Pick-up)',
-          'subtitle': 'Khách đã nhận xe tại Hub và bắt đầu chuyến đi',
+          'subtitle': 'Kiểm tra ODO, vạch xăng và giao chìa khóa',
           'icon': Icons.key_rounded,
           'color': AppColors.primary,
           'isDestructive': false,
         };
       case 'COMPLETED':
         return {
-          'title': 'Khách trả xe & Hoàn tất hợp đồng',
-          'subtitle': 'Kiểm tra xe xong, kết thúc chu kỳ thuê',
+          'title': 'Nghiệm thu trả xe & Hoàn tất (Check-out)',
+          'subtitle': 'Kiểm tra trả xe, quyết toán phụ phí trễ/xăng',
           'icon': Icons.task_alt_rounded,
           'color': AppColors.success,
           'isDestructive': false,
         };
       case 'CANCELLED':
+        final isReject = currentStatus == 'PENDING';
         return {
-          'title': 'Từ chối / Hủy đơn đặt xe',
-          'subtitle': 'Hủy đơn và mở lại slot xe cho khách khác',
+          'title': isReject ? 'Từ chối duyệt đơn (Reject)' : 'Hủy đơn đặt xe (Cancel)',
+          'subtitle': isReject
+              ? 'Từ chối yêu cầu và mở lại slot xe cho khách khác'
+              : 'Hủy đơn đã xác nhận và ghi nhận lý do',
           'icon': Icons.cancel_outlined,
           'color': AppColors.error,
           'isDestructive': true,
@@ -124,7 +130,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Cập nhật tiến trình đơn',
+                      'Điều phối tiến trình đơn',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 17,
@@ -133,7 +139,7 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      booking.bookingCode,
+                      '${booking.bookingCode} · ${booking.customerName}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -157,35 +163,25 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           ...allowedNextStatuses.map((nextStatus) {
-            final action = getActionDetails(nextStatus);
+            final action = getActionDetails(nextStatus, status);
             final isDestructive = action['isDestructive'] as bool;
             final color = action['color'] as Color;
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
-                onTap: () async {
+                onTap: () {
                   Navigator.of(context).pop();
-                  final success = await ref
-                      .read(adminBookingsControllerProvider.notifier)
-                      .updateStatus(
-                        booking.id,
-                        nextStatus,
-                        reason: 'Quản trị viên thực hiện: ${action['title']}',
-                      );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success
-                              ? 'Đã thực hiện: ${action['title']}!'
-                              : 'Lỗi cập nhật trạng thái',
-                        ),
-                        backgroundColor: success ? AppColors.success : AppColors.error,
-                      ),
-                    );
+                  if (nextStatus == 'CONFIRMED') {
+                    AdminApproveBookingDialog.show(context, booking);
+                  } else if (nextStatus == 'PICKED_UP') {
+                    AdminPickupInspectionSheet.show(context, booking);
+                  } else if (nextStatus == 'COMPLETED') {
+                    AdminReturnInspectionSheet.show(context, booking);
+                  } else if (nextStatus == 'CANCELLED') {
+                    AdminCancelBookingDialog.show(context, booking);
                   }
                 },
                 borderRadius: BorderRadius.circular(14),
@@ -203,15 +199,15 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
                   child: Row(
                     children: [
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: 38,
+                        height: 38,
                         decoration: BoxDecoration(
                           color: color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           action['icon'] as IconData,
-                          size: 18,
+                          size: 19,
                           color: color,
                         ),
                       ),
@@ -235,7 +231,9 @@ class AdminBookingTransitionSheet extends ConsumerWidget {
                               action['subtitle'] as String,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ],
