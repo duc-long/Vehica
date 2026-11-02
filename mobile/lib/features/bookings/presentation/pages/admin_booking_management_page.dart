@@ -14,7 +14,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
+import 'package:vehica_mobile/core/widgets/notification_center_sheet.dart';
 import 'package:vehica_mobile/core/widgets/vehica_async_view.dart';
 import 'package:vehica_mobile/core/widgets/vehica_back_button.dart';
 import 'package:vehica_mobile/features/bookings/domain/entities/booking_entity.dart';
@@ -39,6 +41,10 @@ class AdminBookingManagementPage extends ConsumerWidget {
       appBar: AppBar(
         leading: const VehicaBackButton(),
         title: const Text('Quản lý đơn đặt xe'),
+        actions: const [
+          NotificationBellButton(),
+          SizedBox(width: 4),
+        ],
       ),
       body: Column(
         children: [
@@ -85,6 +91,7 @@ class AdminBookingManagementPage extends ConsumerWidget {
                           return AdminBookingCard(
                             booking: booking,
                             margin: EdgeInsets.zero,
+                            onTap: () => context.push('/bookings/${booking.id}'),
                             onTransition: () =>
                                 AdminBookingTransitionSheet.show(context, booking),
                           );
@@ -100,6 +107,7 @@ class AdminBookingManagementPage extends ConsumerWidget {
                         return AdminBookingCard(
                           booking: booking,
                           margin: EdgeInsets.zero,
+                          onTap: () => context.push('/bookings/${booking.id}'),
                           onTransition: () =>
                               AdminBookingTransitionSheet.show(context, booking),
                         );
