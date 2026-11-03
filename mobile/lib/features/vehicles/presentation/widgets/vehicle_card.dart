@@ -10,6 +10,7 @@ import 'package:vehica_mobile/core/constants/app_colors.dart';
 import 'package:vehica_mobile/core/utils/formatters.dart';
 import 'package:vehica_mobile/core/widgets/vehica_image.dart';
 import 'package:vehica_mobile/core/widgets/vehica_status_chip.dart';
+import 'package:vehica_mobile/features/favorites/presentation/widgets/vehica_favorite_button.dart';
 import 'package:vehica_mobile/features/vehicles/domain/entities/vehicle_entity.dart';
 
 class VehicleCard extends StatelessWidget {
@@ -105,6 +106,17 @@ class VehicleCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  ),
+                ),
+
+                // Bottom-Right Favorite Button
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: VehicaFavoriteButton(
+                    vehicle: vehicle,
+                    size: 34,
+                    iconSize: 18,
                   ),
                 ),
               ],

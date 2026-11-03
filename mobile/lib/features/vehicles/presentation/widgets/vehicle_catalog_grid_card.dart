@@ -3,6 +3,7 @@ import 'package:vehica_mobile/core/constants/app_colors.dart';
 import 'package:vehica_mobile/core/utils/formatters.dart';
 import 'package:vehica_mobile/core/widgets/vehica_image.dart';
 import 'package:vehica_mobile/core/widgets/vehica_status_chip.dart';
+import 'package:vehica_mobile/features/favorites/presentation/widgets/vehica_favorite_button.dart';
 import 'package:vehica_mobile/features/vehicles/domain/entities/vehicle_entity.dart';
 
 class VehicleCatalogGridCard extends StatelessWidget {
@@ -95,6 +96,17 @@ class VehicleCatalogGridCard extends StatelessWidget {
                     child: VehicaStatusChip(
                       status: vehicle.status,
                       type: VehicaChipType.vehicleStatus,
+                    ),
+                  ),
+
+                  // Bottom-Right Favorite Button
+                  Positioned(
+                    bottom: 6,
+                    right: 6,
+                    child: VehicaFavoriteButton(
+                      vehicle: vehicle,
+                      size: 30,
+                      iconSize: 16,
                     ),
                   ),
                 ],

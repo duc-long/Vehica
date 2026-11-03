@@ -229,6 +229,50 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 isDark: isDark,
               ),
               const SizedBox(height: 18),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  ),
+                ),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite_rounded,
+                      color: Color(0xFFEF4444),
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    'Xe yêu thích',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Xem lại các mẫu xe bạn đã lưu',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark ? AppColors.textDisabledDark : AppColors.textDisabled,
+                  ),
+                  onTap: () => context.push('/favorites'),
+                ),
+              ),
+              const SizedBox(height: 18),
               ProfileSecurityTile(
                 isDark: isDark,
                 onTap: () => context.push('/forgot-password?email=${Uri.encodeComponent(user.email)}'),

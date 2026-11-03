@@ -18,6 +18,7 @@ import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_det
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_features_section.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_gallery.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_location_card.dart';
+import 'package:vehica_mobile/features/favorites/presentation/widgets/vehica_favorite_button.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_specs_card.dart';
 
 class VehicleDetailPage extends ConsumerWidget {
@@ -90,6 +91,16 @@ class _VehicleDetailContent extends StatelessWidget {
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: VehicaFavoriteButton(
+              vehicle: vehicle,
+              size: 40,
+              iconSize: 22,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
