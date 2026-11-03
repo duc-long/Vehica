@@ -19,6 +19,7 @@ import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_det
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_gallery.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_location_card.dart';
 import 'package:vehica_mobile/features/favorites/presentation/widgets/vehica_favorite_button.dart';
+import 'package:vehica_mobile/features/reviews/presentation/widgets/vehicle_detail_reviews_section.dart';
 import 'package:vehica_mobile/features/vehicles/presentation/widgets/vehicle_detail_specs_card.dart';
 
 class VehicleDetailPage extends ConsumerWidget {
@@ -198,6 +199,13 @@ class _VehicleDetailContent extends StatelessWidget {
 
             // 6. Hub Location & Operating Hours
             VehicleDetailLocationCard(isDark: isDark),
+            const SizedBox(height: 20),
+
+            // 7. Customer Ratings & Reviews
+            VehicleDetailReviewsSection(
+              vehicle: vehicle,
+              isDark: isDark,
+            ),
             const SizedBox(height: 16),
           ],
         ),

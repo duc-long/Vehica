@@ -77,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                         // Authenticated Operations
-                        .requestMatchers("/api/v1/me/**", "/api/v1/bookings/**", "/api/v1/favorites/**").authenticated()
+                        .requestMatchers("/api/v1/me/**", "/api/v1/bookings/**", "/api/v1/favorites/**", "/api/v1/reviews/**").authenticated()
 
                         // Any other request must be authenticated
                         .anyRequest().authenticated()

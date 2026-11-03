@@ -311,6 +311,7 @@ public class BookingService {
                 .bookingCode(booking.getBookingCode())
                 .customerName(booking.getUser() != null ? booking.getUser().getFullName() : null)
                 .vehicleName(booking.getVehicle() != null ? booking.getVehicle().getName() : null)
+                .vehicleId(booking.getVehicle() != null ? booking.getVehicle().getId() : null)
                 .vehicleBrand(booking.getVehicle() != null ? booking.getVehicle().getBrand() : null)
                 .vehicleModel(booking.getVehicle() != null ? booking.getVehicle().getModel() : null)
                 .vehicleImageUrl(primaryImage)
