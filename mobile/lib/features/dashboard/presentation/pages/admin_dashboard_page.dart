@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
+import 'package:vehica_mobile/core/widgets/notification_center_sheet.dart';
 import 'package:vehica_mobile/core/widgets/vehica_back_button.dart';
 import 'package:vehica_mobile/core/widgets/vehica_badge.dart';
 import 'package:vehica_mobile/core/widgets/vehica_skeleton.dart';
@@ -42,11 +43,13 @@ class AdminDashboardPage extends ConsumerWidget {
           ],
         ),
         actions: [
+          const NotificationBellButton(),
           IconButton(
             tooltip: 'Làm mới dữ liệu',
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref.invalidate(adminDashboardSummaryProvider),
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: RefreshIndicator(

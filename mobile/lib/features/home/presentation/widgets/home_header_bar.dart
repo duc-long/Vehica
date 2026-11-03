@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vehica_mobile/core/constants/app_colors.dart';
+import 'package:vehica_mobile/core/widgets/notification_center_sheet.dart';
 import 'package:vehica_mobile/core/widgets/vehica_image.dart';
 import 'package:vehica_mobile/features/auth/domain/entities/user_entity.dart';
 
@@ -107,8 +108,11 @@ class HomeHeaderBar extends StatelessWidget {
               ),
             ),
           ),
+          // Notification Bell
+          const NotificationBellButton(),
           // Admin Portal Shortcut (Only shown for Admin)
-          if (isAdmin)
+          if (isAdmin) ...[
+            const SizedBox(width: 6),
             Container(
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
@@ -124,6 +128,7 @@ class HomeHeaderBar extends StatelessWidget {
                 onPressed: () => context.push('/admin/dashboard'),
               ),
             ),
+          ],
         ],
       ),
     );
