@@ -182,7 +182,7 @@ class _AdminReturnInspectionSheetState extends ConsumerState<AdminReturnInspecti
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _fuelLevel,
+              initialValue: _fuelLevel,
               decoration: InputDecoration(
                 labelText: 'Mức nhiên liệu / Pin lúc trả',
                 prefixIcon: const Icon(Icons.local_gas_station_rounded, size: 18),

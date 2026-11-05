@@ -43,8 +43,6 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String? _serverOtpHint;
-
   @override
   void initState() {
     super.initState();
@@ -96,12 +94,11 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
 
     final email = _emailController.text.trim();
     try {
-      final otp = await ref.read(authControllerProvider.notifier).forgotPassword(email);
+      await ref.read(authControllerProvider.notifier).forgotPassword(email);
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
-        _serverOtpHint = otp;
         _currentStep = 2;
       });
       _startCountdown(60);
@@ -488,35 +485,6 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
             ),
           ),
           const SizedBox(height: 14),
-
-          // Live OTP Hint Banner (if available in dev/testing response)
-          if (_serverOtpHint != null && _serverOtpHint != 'sent') ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.code_rounded, color: Colors.amber, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Mã OTP (môi trường dev): $_serverOtpHint',
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-          ],
 
           // Error banner
           if (_errorMessage != null) ...[

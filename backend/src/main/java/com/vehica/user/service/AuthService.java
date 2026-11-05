@@ -187,8 +187,7 @@ public class AuthService {
                 "message", "Mã xác thực OTP đã được gửi đến email " + email + ". Vui lòng kiểm tra hộp thư đến hoặc thư rác/spam.",
                 "email", email,
                 "expiresInSeconds", OTP_EXPIRY_MINUTES * 60,
-                "cooldownSeconds", OTP_COOLDOWN_SECONDS,
-                "otp", otp
+                "cooldownSeconds", OTP_COOLDOWN_SECONDS
         );
     }
 

@@ -17,16 +17,20 @@ class AdminPickupInspectionSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => AdminPickupInspectionSheet(booking: booking),
     );
   }
 
   @override
-  ConsumerState<AdminPickupInspectionSheet> createState() => _AdminPickupInspectionSheetState();
+  ConsumerState<AdminPickupInspectionSheet> createState() =>
+      _AdminPickupInspectionSheetState();
 }
 
-class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspectionSheet> {
+class _AdminPickupInspectionSheetState
+    extends ConsumerState<AdminPickupInspectionSheet> {
   final _odoController = TextEditingController();
   final _noteController = TextEditingController();
   String _fuelLevel = '100% (Đầy)';
@@ -43,9 +47,14 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
 
   Future<void> _handleConfirmPickup() async {
     setState(() => _isLoading = true);
-    final odo = _odoController.text.trim().isEmpty ? 'N/A' : '${_odoController.text.trim()} km';
-    final note = _noteController.text.trim().isEmpty ? 'Ngoại quan bình thường' : _noteController.text.trim();
-    final reason = 'Bàn giao xe: ODO $odo | Xăng: $_fuelLevel | GPLX: ${_checkLicense ? "Đã đối chiếu" : "Chưa"} | $note';
+    final odo = _odoController.text.trim().isEmpty
+        ? 'N/A'
+        : '${_odoController.text.trim()} km';
+    final note = _noteController.text.trim().isEmpty
+        ? 'Ngoại quan bình thường'
+        : _noteController.text.trim();
+    final reason =
+        'Bàn giao xe: ODO $odo | Xăng: $_fuelLevel | GPLX: ${_checkLicense ? "Đã đối chiếu" : "Chưa"} | $note';
 
     final success = await ref
         .read(adminBookingsControllerProvider.notifier)
@@ -57,7 +66,9 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            success ? 'Bàn giao xe cho khách thành công!' : 'Lỗi khi cập nhật bàn giao xe.',
+            success
+                ? 'Bàn giao xe cho khách thành công!'
+                : 'Lỗi khi cập nhật bàn giao xe.',
           ),
           backgroundColor: success ? AppColors.success : AppColors.error,
         ),
@@ -71,7 +82,12 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
     final booking = widget.booking;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        16,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -96,7 +112,11 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
                     color: AppColors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.key_rounded, color: AppColors.primary, size: 22),
+                  child: const Icon(
+                    Icons.key_rounded,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -105,11 +125,18 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
                     children: [
                       const Text(
                         'Biên bản bàn giao xe (Check-in)',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       Text(
                         '${booking.bookingCode} · ${booking.vehicleName}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.primaryLight, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primaryLight,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -125,28 +152,43 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
                 hintText: 'VD: 35200',
                 prefixIcon: const Icon(Icons.speed_rounded, size: 18),
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                fillColor: isDark
+                    ? AppColors.surfaceVariantDark
+                    : AppColors.surfaceVariantLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               style: const TextStyle(fontSize: 13.5),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _fuelLevel,
+              initialValue: _fuelLevel,
               decoration: InputDecoration(
                 labelText: 'Mức nhiên liệu / Pin lúc giao',
-                prefixIcon: const Icon(Icons.local_gas_station_rounded, size: 18),
+                prefixIcon: const Icon(
+                  Icons.local_gas_station_rounded,
+                  size: 18,
+                ),
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                fillColor: isDark
+                    ? AppColors.surfaceVariantDark
+                    : AppColors.surfaceVariantLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               items: const [
-                DropdownMenuItem(value: '100% (Đầy)', child: Text('100% (Đầy)')),
+                DropdownMenuItem(
+                  value: '100% (Đầy)',
+                  child: Text('100% (Đầy)'),
+                ),
                 DropdownMenuItem(value: '75%', child: Text('75%')),
                 DropdownMenuItem(value: '50%', child: Text('50%')),
                 DropdownMenuItem(value: '25%', child: Text('25%')),
               ],
-              onChanged: (val) => setState(() => _fuelLevel = val ?? _fuelLevel),
+              onChanged: (val) =>
+                  setState(() => _fuelLevel = val ?? _fuelLevel),
             ),
             const SizedBox(height: 12),
             CheckboxListTile(
@@ -154,7 +196,10 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
               dense: true,
               contentPadding: EdgeInsets.zero,
               activeColor: AppColors.primary,
-              title: const Text('Đã đối chiếu bản gốc GPLX & CCCD của khách', style: TextStyle(fontSize: 12.5)),
+              title: const Text(
+                'Đã đối chiếu bản gốc GPLX & CCCD của khách',
+                style: TextStyle(fontSize: 12.5),
+              ),
               onChanged: (val) => setState(() => _checkLicense = val ?? false),
             ),
             CheckboxListTile(
@@ -162,7 +207,10 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
               dense: true,
               contentPadding: EdgeInsets.zero,
               activeColor: AppColors.primary,
-              title: const Text('Đã bàn giao đủ 2 chìa khóa & giấy tờ lưu hành xe', style: TextStyle(fontSize: 12.5)),
+              title: const Text(
+                'Đã bàn giao đủ 2 chìa khóa & giấy tờ lưu hành xe',
+                style: TextStyle(fontSize: 12.5),
+              ),
               onChanged: (val) => setState(() => _checkKeys = val ?? false),
             ),
             const SizedBox(height: 8),
@@ -172,8 +220,12 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
                 labelText: 'Ghi chú hiện trạng ngoại thất',
                 hintText: 'VD: Xe sạch sẽ, không trầy xước mới...',
                 filled: true,
-                fillColor: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                fillColor: isDark
+                    ? AppColors.surfaceVariantDark
+                    : AppColors.surfaceVariantLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               style: const TextStyle(fontSize: 13),
             ),
@@ -192,4 +244,3 @@ class _AdminPickupInspectionSheetState extends ConsumerState<AdminPickupInspecti
     );
   }
 }
-

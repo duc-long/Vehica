@@ -111,10 +111,8 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   /// Dispatches a password reset OTP request (UC-14, BR-23).
-  Future<String?> forgotPassword(String email) async {
-    final res = await authRepository.forgotPassword(email.trim().toLowerCase());
-    final otp = res['otp']?.toString();
-    return (otp != null && otp.isNotEmpty) ? otp : 'sent';
+  Future<void> forgotPassword(String email) async {
+    await authRepository.forgotPassword(email.trim().toLowerCase());
   }
 
   /// Verifies the OTP code against the database (UC-14, BR-23).
