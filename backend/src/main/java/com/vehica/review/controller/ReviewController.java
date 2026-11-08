@@ -57,6 +57,10 @@ public class ReviewController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable UUID vehicleId) {
 
+        if (userPrincipal == null) {
+            return ResponseEntity.ok(ApiResponse.success(null));
+        }
+
         ReviewDtos.ReviewDto review = reviewService.getUserReviewForVehicle(userPrincipal.getId(), vehicleId)
                 .orElse(null);
         return ResponseEntity.ok(ApiResponse.success(review));
@@ -92,6 +96,28 @@ public class ReviewController {
         ReviewDtos.ReviewDto created = reviewService.createOrUpdateReview(userPrincipal.getId(), vehicleId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Đánh giá xe thành công.", created));
+    }
+
+    @PutMapping("/api/v1/vehicles/{vehicleId}/reviews")
+    @Operation(summary = "Update customer's review for a vehicle")
+    public ResponseEntity<ApiResponse<ReviewDtos.ReviewDto>> updateVehicleReview(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody ReviewDtos.CreateReviewRequest request) {
+
+        ReviewDtos.ReviewDto updated = reviewService.createOrUpdateReview(userPrincipal.getId(), vehicleId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật đánh giá thành công.", updated));
+    }
+
+    @PutMapping("/api/v1/reviews/{reviewId}")
+    @Operation(summary = "Update review by review ID")
+    public ResponseEntity<ApiResponse<ReviewDtos.ReviewDto>> updateReviewById(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PathVariable UUID reviewId,
+            @Valid @RequestBody ReviewDtos.CreateReviewRequest request) {
+
+        ReviewDtos.ReviewDto updated = reviewService.updateReviewById(userPrincipal.getId(), reviewId, request);
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật đánh giá thành công.", updated));
     }
 
     @DeleteMapping("/api/v1/reviews/{reviewId}")

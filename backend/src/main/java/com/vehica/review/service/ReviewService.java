@@ -66,7 +66,24 @@ public class ReviewService {
             log.info("User {} created new review for vehicle {}", userId, vehicleId);
         }
 
-        VehicleReview saved = vehicleReviewRepository.save(review);
+        VehicleReview saved = vehicleReviewRepository.saveAndFlush(review);
+        return mapToDto(saved);
+    }
+
+    @Transactional
+    public ReviewDtos.ReviewDto updateReviewById(UUID userId, UUID reviewId, ReviewDtos.CreateReviewRequest request) {
+        VehicleReview review = vehicleReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá với ID: " + reviewId));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("Bạn không có quyền chỉnh sửa đánh giá của người dùng khác.");
+        }
+
+        review.setRating(request.getRating());
+        review.setReviewText(request.getReviewText().trim());
+
+        VehicleReview saved = vehicleReviewRepository.saveAndFlush(review);
+        log.info("User {} updated review {}", userId, reviewId);
         return mapToDto(saved);
     }
 

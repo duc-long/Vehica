@@ -172,6 +172,8 @@ class VehicleDetailReviewsSection extends ConsumerWidget {
                   review: review,
                   isDark: isDark,
                   isMyReview: review.id == reviewState.myReview?.id,
+                  onEdit: () => _handleWriteReview(context, ref, reviewState),
+                  onDelete: () => _handleDeleteReview(context, ref, review.id),
                 );
               },
             ),
@@ -399,17 +401,74 @@ class VehicleDetailReviewsSection extends ConsumerWidget {
       initialReview: reviewState.myReview,
     );
   }
+
+  void _handleDeleteReview(BuildContext context, WidgetRef ref, String reviewId) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Xóa đánh giá?',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          'Bạn có chắc chắn muốn xóa bài đánh giá này của mình không?',
+          style: TextStyle(
+            fontSize: 13.5,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              'Hủy',
+              style: TextStyle(
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogCtx).pop();
+              try {
+                await ref.read(reviewControllerProvider(vehicle.id).notifier).deleteReview(reviewId);
+                VehicaFeedback.showSuccess('Đã xóa đánh giá thành công.');
+              } catch (e) {
+                VehicaFeedback.showError('Không thể xóa đánh giá: $e');
+              }
+            },
+            child: const Text(
+              'Xóa',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ReviewItemTile extends StatelessWidget {
   final ReviewEntity review;
   final bool isDark;
   final bool isMyReview;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const _ReviewItemTile({
     required this.review,
     required this.isDark,
     required this.isMyReview,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -512,6 +571,57 @@ class _ReviewItemTile extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Menu if my review
+            if (isMyReview) ...[
+              const SizedBox(width: 4),
+              PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  size: 18,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onSelected: (val) {
+                  if (val == 'edit') {
+                    onEdit?.call();
+                  } else if (val == 'delete') {
+                    onDelete?.call();
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.edit_outlined, size: 16, color: AppColors.primaryLight),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Sửa đánh giá',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                        SizedBox(width: 8),
+                        Text('Xóa đánh giá', style: TextStyle(fontSize: 13, color: Colors.redAccent)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 8),
