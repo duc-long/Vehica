@@ -125,6 +125,11 @@ class VehicleRemoteDataSource {
       ApiEndpoints.adminVehicleSchedule(vehicleId),
       queryParameters: query,
     );
-    return List<Map<String, dynamic>>.from(response['data'] as List);
+    if (response != null && response['data'] is List) {
+      return (response['data'] as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    }
+    return [];
   }
 }
