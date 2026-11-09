@@ -19,6 +19,7 @@ class BookingSyncService {
   bool _isFirstRun = true;
 
   final Set<String> _knownAdminBookingIds = {};
+  final Map<String, String> _knownAdminBookingStatuses = {};
   final Map<String, String> _knownUserBookingStatuses = {};
 
   BookingSyncService({required this.ref, required this.repository}) {
@@ -44,13 +45,14 @@ class BookingSyncService {
     _syncTimer?.cancel();
     _isFirstRun = true;
     _knownAdminBookingIds.clear();
+    _knownAdminBookingStatuses.clear();
     _knownUserBookingStatuses.clear();
 
     // Run first sync immediately to populate baseline
     _runSync();
 
-    // Background interval: sync every 10 seconds
-    _syncTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+    // Background interval: sync every 8 seconds
+    _syncTimer = Timer.periodic(const Duration(seconds: 8), (_) {
       _runSync();
     });
   }
@@ -60,6 +62,7 @@ class BookingSyncService {
     _syncTimer = null;
     _isFirstRun = true;
     _knownAdminBookingIds.clear();
+    _knownAdminBookingStatuses.clear();
     _knownUserBookingStatuses.clear();
   }
 
@@ -84,23 +87,29 @@ class BookingSyncService {
   }
 
   Future<void> _syncAdminBookings() async {
-    final bookings = await repository.getAdminBookings(page: 0, size: 5);
+    final bookings = await repository.getAdminBookings(page: 0, size: 20);
 
     if (_isFirstRun) {
       for (final b in bookings) {
         _knownAdminBookingIds.add(b.id);
+        _knownAdminBookingStatuses[b.id] = b.status;
       }
       return;
     }
 
+    bool shownPush = false;
+    bool needsRefresh = false;
+
     for (final b in bookings) {
+      // Case 1: Đơn đặt xe hoàn toàn mới
       if (!_knownAdminBookingIds.contains(b.id)) {
         _knownAdminBookingIds.add(b.id);
+        _knownAdminBookingStatuses[b.id] = b.status;
 
         final title = 'Đơn đặt xe mới!';
         final message = '${b.customerName} vừa đặt xe ${b.vehicleName} (Mã: ${b.bookingCode})';
 
-        // 1. Save to local notification inbox
+        // 1. Lưu vào notification inbox cục bộ
         ref.read(notificationListProvider.notifier).addNotification(
           title: title,
           message: message,
@@ -109,26 +118,71 @@ class BookingSyncService {
           type: 'NEW_BOOKING',
         );
 
-        // 2. Immediate In-App Push Notification for Admin
-        VehicaFeedback.showInAppPush(
-          title: title,
-          message: message,
-          icon: Icons.notifications_active_rounded,
-          onTap: () {
-            VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
-          },
-        );
+        // 2. Bắn In-App Push Banner nổi (tối đa 1 banner mỗi lần sync)
+        if (!shownPush) {
+          VehicaFeedback.showInAppPush(
+            title: title,
+            message: message,
+            icon: Icons.notifications_active_rounded,
+            onTap: () {
+              VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
+            },
+          );
+          shownPush = true;
+        }
 
-        // Invalidate state reactively so UI refreshes without manual reload
-        ref.invalidate(adminBookingsControllerProvider);
-        ref.invalidate(adminDashboardSummaryProvider);
-        break; // Show at most 1 banner per poll to prevent screen flooding
+        needsRefresh = true;
+      } else {
+        // Case 2: Đơn đã có nhưng thay đổi trạng thái (ví dụ khách hủy đơn)
+        final oldStatus = _knownAdminBookingStatuses[b.id];
+        if (oldStatus != null && oldStatus.toUpperCase() != b.status.toUpperCase()) {
+          _knownAdminBookingStatuses[b.id] = b.status;
+
+          final isCancelled = b.status.toUpperCase() == 'CANCELLED';
+          final title = isCancelled ? 'Khách đã hủy đơn đặt xe' : 'Cập nhật đơn đặt xe';
+          final message = isCancelled
+              ? '${b.customerName} đã hủy đơn xe ${b.vehicleName} (Mã: ${b.bookingCode})'
+              : 'Đơn xe ${b.vehicleName} (${b.bookingCode}) đã chuyển sang ${_translateStatus(b.status)}';
+
+          // 1. Lưu vào notification inbox
+          ref.read(notificationListProvider.notifier).addNotification(
+            title: title,
+            message: message,
+            bookingId: b.id,
+            bookingCode: b.bookingCode,
+            type: 'STATUS_CHANGE',
+          );
+
+          // 2. Bắn In-App Push Banner
+          if (!shownPush) {
+            VehicaFeedback.showInAppPush(
+              title: title,
+              message: message,
+              icon: isCancelled ? Icons.cancel_outlined : Icons.info_outline_rounded,
+              onTap: () {
+                VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
+              },
+            );
+            shownPush = true;
+          }
+
+          ref.invalidate(bookingDetailProvider(b.id));
+          ref.invalidate(bookingHistoryProvider(b.id));
+          needsRefresh = true;
+        } else {
+          _knownAdminBookingStatuses[b.id] = b.status;
+        }
       }
+    }
+
+    if (needsRefresh) {
+      ref.invalidate(adminBookingsControllerProvider);
+      ref.invalidate(adminDashboardSummaryProvider);
     }
   }
 
   Future<void> _syncUserBookings() async {
-    final bookings = await repository.getMyBookings(page: 0, size: 5);
+    final bookings = await repository.getMyBookings(page: 0, size: 20);
 
     if (_isFirstRun) {
       for (final b in bookings) {
@@ -136,6 +190,9 @@ class BookingSyncService {
       }
       return;
     }
+
+    bool shownPush = false;
+    bool needsRefresh = false;
 
     for (final b in bookings) {
       final oldStatus = _knownUserBookingStatuses[b.id];
@@ -154,22 +211,31 @@ class BookingSyncService {
           type: 'STATUS_CHANGE',
         );
 
-        // 2. Immediate In-App Push Notification for Customer
-        VehicaFeedback.showInAppPush(
-          title: title,
-          message: message,
-          icon: Icons.check_circle_outline_rounded,
-          onTap: () {
-            VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
-          },
-        );
+        // 2. Immediate In-App Push Notification for Customer (tối đa 1 banner mỗi lần sync)
+        if (!shownPush) {
+          VehicaFeedback.showInAppPush(
+            title: title,
+            message: message,
+            icon: Icons.check_circle_outline_rounded,
+            onTap: () {
+              VehicaFeedback.navigatorKey.currentContext?.push('/bookings/${b.id}');
+            },
+          );
+          shownPush = true;
+        }
 
-        // Invalidate state reactively so user bookings refresh instantly
-        ref.invalidate(myBookingsControllerProvider);
-        break;
+        // Invalidate cả chi tiết đơn cụ thể để màn hình BookingDetailPage tự động render lại ngay
+        ref.invalidate(bookingDetailProvider(b.id));
+        ref.invalidate(bookingHistoryProvider(b.id));
+        needsRefresh = true;
       } else {
         _knownUserBookingStatuses[b.id] = b.status;
       }
+    }
+
+    if (needsRefresh) {
+      // Invalidate state reactively so user bookings list refreshes instantly
+      ref.invalidate(myBookingsControllerProvider);
     }
   }
 

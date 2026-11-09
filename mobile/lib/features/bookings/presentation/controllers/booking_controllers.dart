@@ -76,15 +76,16 @@ final myBookingsControllerProvider =
   return MyBookingsController(repository: repo, ref: ref);
 });
 
-/// Provider for viewing booking details (S06)
-final bookingDetailProvider = FutureProvider.family<BookingDetailEntity, String>((ref, bookingId) async {
+/// Provider for viewing booking details (S06) - autoDispose to prevent stale cache
+final bookingDetailProvider =
+    FutureProvider.autoDispose.family<BookingDetailEntity, String>((ref, bookingId) async {
   final repo = ref.watch(bookingRepositoryProvider);
   return repo.getBookingDetail(bookingId);
 });
 
 /// Provider for viewing status transition history (Audit Timeline) (S06, BR-21)
 final bookingHistoryProvider =
-    FutureProvider.family<List<BookingStatusHistoryEntity>, String>((ref, bookingId) async {
+    FutureProvider.autoDispose.family<List<BookingStatusHistoryEntity>, String>((ref, bookingId) async {
   final repo = ref.watch(bookingRepositoryProvider);
   return repo.getBookingHistory(bookingId);
 });
